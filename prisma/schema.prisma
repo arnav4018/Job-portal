@@ -1,0 +1,355 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// Auth Models
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// Core User Models
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  role          String    @default("CANDIDATE") // CANDIDATE, RECRUITER, ADMIN
+  status        String    @default("ACTIVE")    // ACTIVE, INACTIVE, SUSPENDED
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  accounts      Account[]
+  sessions      Session[]
+  profile       Profile?
+  company       Company?
+  jobs          Job[]
+  applications  Application[]
+  resumes       Resume[]
+  referrals     Referral[]
+  referredBy    Referral[] @relation("ReferredUser")
+  payments      Payment[]
+  recruiterConversations Conversation[] @relation("RecruiterConversations")
+  candidateConversations Conversation[] @relation("CandidateConversations")
+  messages      Message[]
+  notifications Notification[]
+  auditLogs     Audit[]
+
+  @@map("users")
+}
+
+model Profile {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  firstName   String?
+  lastName    String?
+  phone       String?
+  location    String?
+  bio         String?
+  website     String?
+  linkedin    String?
+  github      String?
+  experience  Int?     // Years of experience
+  skills      String?  // JSON string of skills array
+  preferences String?  // JSON string of preferences
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("profiles")
+}
+
+model Company {
+  id          String   @id @default(cuid())
+  userId      String   @unique // Recruiter who owns this company
+  name        String
+  description String?
+  website     String?
+  logo        String?
+  location    String?
+  size        String?  // "1-10", "11-50", etc.
+  industry    String?
+  verified    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  jobs Job[]
+
+  @@map("companies")
+}
+
+// Job Models
+model Job {
+  id              String    @id @default(cuid())
+  title           String
+  description     String
+  requirements    String
+  responsibilities String
+  skills          String?   // JSON string of skills array
+  type            String    // FULL_TIME, PART_TIME, CONTRACT, INTERNSHIP, FREELANCE
+  status          String    @default("DRAFT") // DRAFT, PUBLISHED, PAUSED, CLOSED
+  experienceLevel String    // ENTRY, MID, SENIOR, LEAD, EXECUTIVE
+  location        String
+  remote          Boolean   @default(false)
+  salaryMin       Int?
+  salaryMax       Int?
+  currency        String    @default("INR")
+  featured        Boolean   @default(false)
+  featuredUntil   DateTime?
+  views           Int       @default(0)
+  companyId       String
+  recruiterId     String
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  expiresAt       DateTime?
+
+  // Relations
+  company      Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  recruiter    User          @relation(fields: [recruiterId], references: [id], onDelete: Cascade)
+  applications Application[]
+  referrals    Referral[]
+  searches     JobSearch[]
+
+  @@map("jobs")
+}
+
+// Application Models
+model Application {
+  id          String   @id @default(cuid())
+  jobId       String
+  candidateId String
+  resumeId    String?
+  coverLetter String?
+  status      String   @default("APPLIED") // APPLIED, SHORTLISTED, INTERVIEW_SCHEDULED, INTERVIEW_COMPLETED, HIRED, REJECTED
+  matchScore  Float?   // AI skill match score (0-100)
+  notes       String?  // Recruiter notes
+  appliedAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  job       Job     @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  candidate User    @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  resume    Resume? @relation(fields: [resumeId], references: [id])
+
+  @@unique([jobId, candidateId])
+  @@map("applications")
+}
+
+// Resume Models
+model Resume {
+  id           String   @id @default(cuid())
+  userId       String
+  title        String
+  data         String   // JSON string of resume data
+  pdfUrl       String?  // S3 URL for PDF
+  isDefault    Boolean  @default(false)
+  downloadCount Int     @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relations
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  applications Application[]
+
+  @@map("resumes")
+}
+
+// Search & Analytics
+model JobSearch {
+  id        String   @id @default(cuid())
+  userId    String?  // null for guest users
+  jobId     String?  // null for general searches
+  query     String?
+  filters   String?  // JSON string of search filters
+  results   Int      @default(0)
+  createdAt DateTime @default(now())
+
+  job Job? @relation(fields: [jobId], references: [id])
+
+  @@map("job_searches")
+}
+
+// Referral System
+model Referral {
+  id          String    @id @default(cuid())
+  referrerId  String    // User who made the referral
+  referredId  String?   // User who was referred (null until they sign up)
+  jobId       String
+  code        String    @unique // Unique referral code
+  status      String    @default("PENDING") // PENDING, APPLIED, INTERVIEW, HIRED, REJECTED
+  reward      Float?    // Reward amount
+  paidAt      DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Relations
+  referrer User @relation(fields: [referrerId], references: [id], onDelete: Cascade)
+  referred User? @relation("ReferredUser", fields: [referredId], references: [id])
+  job      Job  @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  @@map("referrals")
+}
+
+// Payment System
+model PaymentPlan {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?
+  price       Float
+  currency    String   @default("INR")
+  duration    Int      // Duration in days
+  features    String   // JSON string of plan features
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  payments Payment[]
+
+  @@map("payment_plans")
+}
+
+model Payment {
+  id              String    @id @default(cuid())
+  userId          String
+  planId          String?
+  type            String    // JOB_FEATURE, SUBSCRIPTION, REFERRAL_PAYOUT
+  amount          Float
+  currency        String    @default("INR")
+  status          String    @default("PENDING") // PENDING, COMPLETED, FAILED, REFUNDED
+  provider        String    // "razorpay" or "stripe"
+  providerOrderId String?
+  providerPaymentId String?
+  metadata        String?   // JSON string
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  // Relations
+  user User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan PaymentPlan? @relation(fields: [planId], references: [id])
+
+  @@map("payments")
+}
+
+// Messaging System
+model Conversation {
+  id           String   @id @default(cuid())
+  jobId        String?  // Optional: conversation about a specific job
+  recruiterId  String
+  candidateId  String
+  lastMessage  String?
+  lastMessageAt DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relations
+  recruiter User      @relation("RecruiterConversations", fields: [recruiterId], references: [id], onDelete: Cascade)
+  candidate User      @relation("CandidateConversations", fields: [candidateId], references: [id], onDelete: Cascade)
+  messages  Message[]
+
+  @@unique([recruiterId, candidateId, jobId])
+  @@map("conversations")
+}
+
+model Message {
+  id             String   @id @default(cuid())
+  conversationId String
+  senderId       String
+  content        String
+  read           Boolean  @default(false)
+  createdAt      DateTime @default(now())
+
+  // Relations
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sender       User         @relation(fields: [senderId], references: [id], onDelete: Cascade)
+
+  @@map("messages")
+}
+
+// Notifications
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  type      String   // APPLICATION_STATUS, NEW_MESSAGE, JOB_ALERT, REFERRAL_UPDATE, PAYMENT_SUCCESS, SYSTEM_ANNOUNCEMENT
+  title     String
+  message   String
+  data      String?  // JSON string of additional data
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notifications")
+}
+
+// System Settings
+model SystemSetting {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String
+  type      String   @default("string") // "string", "number", "boolean", "json"
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("system_settings")
+}
+
+// Audit Logs
+model Audit {
+  id        String   @id @default(cuid())
+  userId    String?
+  action    String   // CREATE, UPDATE, DELETE, LOGIN, LOGOUT, PAYMENT, APPLICATION, MESSAGE
+  resource  String   // Table/resource name
+  resourceId String? // ID of the affected resource
+  oldData   String?  // JSON string
+  newData   String?  // JSON string
+  metadata  String?  // JSON string of additional context
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id])
+
+  @@map("audit_logs")
+}

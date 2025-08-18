@@ -1,0 +1,85 @@
+# Node.js
+node_modules/
+npm-debug.log
+yarn-error.log
+yarn.lock
+package-lock.json
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Next.js
+.next/
+out/
+build/
+
+# Prisma
+prisma/dev.db
+prisma/dev.db-journal
+
+# Logs
+logs/
+*.log
+*.log.*
+
+# Dependency directories
+/lib-cov
+/coverage
+/.nyc_output
+
+# Build output
+/dist
+/build
+
+# Testing
+/coverage
+/test-results/
+/playwright-report/
+/playwright/.cache/
+
+# Vercel
+.vercel
+
+# AWS S3 / Cloudflare R2
+*.pem
+*.key
+
+# MacOS
+.DS_Store
+
+# Windows
+Thumbs.db
+ehthumbs.db
+
+# IDEs and editors
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.backup
+
+# Production
+/public/build
+/public/uploads
+
+# Cache
+*.cache
+.eslintcache
+.stylelintcache
+
+# Miscellaneous
+*.pid
+*.seed
+*.pid.lock

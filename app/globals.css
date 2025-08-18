@@ -1,0 +1,218 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 221.2 83.2% 53.3%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222.2 84% 4.9%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96%;
+    --accent-foreground: 222.2 84% 4.9%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 221.2 83.2% 53.3%;
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 217.2 91.2% 59.8%;
+    --primary-foreground: 222.2 84% 4.9%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 224.3 76.3% 94.1%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-muted;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-muted-foreground/30 rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-muted-foreground/50;
+}
+
+/* Loading animations */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: .5;
+  }
+}
+
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Job card hover effects */
+.job-card {
+  @apply transition-all duration-200 hover:shadow-md hover:-translate-y-1;
+}
+
+/* Resume preview styles */
+.resume-preview {
+  @apply bg-white text-black p-8 shadow-lg;
+  font-family: 'Times New Roman', serif;
+  line-height: 1.4;
+}
+
+.resume-preview h1 {
+  @apply text-2xl font-bold mb-2;
+}
+
+.resume-preview h2 {
+  @apply text-lg font-semibold mb-3 border-b border-gray-300 pb-1;
+}
+
+.resume-preview h3 {
+  @apply text-base font-semibold mb-1;
+}
+
+.resume-preview .section {
+  @apply mb-6;
+}
+
+.resume-preview .experience-item,
+.resume-preview .education-item,
+.resume-preview .project-item {
+  @apply mb-4;
+}
+
+.resume-preview .date-range {
+  @apply text-sm text-gray-600 italic;
+}
+
+.resume-preview ul {
+  @apply list-disc list-inside ml-4;
+}
+
+.resume-preview .skills-list {
+  @apply flex flex-wrap gap-2;
+}
+
+.resume-preview .skill-tag {
+  @apply bg-gray-100 px-2 py-1 rounded text-sm;
+}
+
+/* Chat styles */
+.chat-container {
+  @apply flex flex-col h-full;
+}
+
+.chat-messages {
+  @apply flex-1 overflow-y-auto p-4 space-y-4;
+}
+
+.message {
+  @apply flex items-start space-x-3;
+}
+
+.message.own {
+  @apply flex-row-reverse space-x-reverse;
+}
+
+.message-bubble {
+  @apply max-w-xs lg:max-w-md px-4 py-2 rounded-lg;
+}
+
+.message-bubble.own {
+  @apply bg-primary text-primary-foreground;
+}
+
+.message-bubble.other {
+  @apply bg-muted;
+}
+
+/* Form styles */
+.form-section {
+  @apply space-y-6 p-6 border rounded-lg;
+}
+
+.form-grid {
+  @apply grid grid-cols-1 md:grid-cols-2 gap-4;
+}
+
+.form-field {
+  @apply space-y-2;
+}
+
+/* Dashboard stats */
+.stat-card {
+  @apply bg-gradient-to-r p-6 rounded-lg text-white;
+}
+
+.stat-card.primary {
+  @apply from-blue-500 to-blue-600;
+}
+
+.stat-card.success {
+  @apply from-green-500 to-green-600;
+}
+
+.stat-card.warning {
+  @apply from-yellow-500 to-yellow-600;
+}
+
+.stat-card.danger {
+  @apply from-red-500 to-red-600;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .container {
+    @apply px-4;
+  }
+  
+  .form-grid {
+    @apply grid-cols-1;
+  }
+  
+  .resume-preview {
+    @apply p-4 text-sm;
+  }
+}
