@@ -4,7 +4,6 @@ import { prisma } from '@/lib/prisma'
 import { authOptions } from '@/lib/auth'
 import { jobSchema, jobSearchSchema } from '@/lib/validations'
 
-
 // GET /api/jobs - Search and list jobs
 export async function GET(request: NextRequest) {
   try {
@@ -25,7 +24,7 @@ export async function GET(request: NextRequest) {
     const validatedData = jobSearchSchema.parse(searchData)
     
     const where: any = {
-      status: JobStatus.PUBLISHED,
+      status: 'PUBLISHED',
     }
     
     // Build search conditions
@@ -111,7 +110,7 @@ export async function GET(request: NextRequest) {
     await prisma.jobSearch.create({
       data: {
         query: validatedData.query,
-        filters: validatedData,
+        filters: JSON.stringify(validatedData),
         results: total,
       },
     })
@@ -188,7 +187,7 @@ export async function POST(request: NextRequest) {
         action: 'CREATE',
         resource: 'job',
         resourceId: job.id,
-        newData: job,
+        newData: JSON.stringify(job),
       },
     })
     

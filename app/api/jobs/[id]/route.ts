@@ -104,9 +104,12 @@ export async function PATCH(
     const validatedData = jobSchema.partial().parse(body)
     
     // Convert skills array to JSON string if present
-    const updateData = {
+    const updateData: any = {
       ...validatedData,
-      ...(validatedData.skills && { skills: JSON.stringify(validatedData.skills) }),
+    };
+    
+    if (validatedData.skills !== undefined) {
+      updateData.skills = JSON.stringify(validatedData.skills);
     }
     
     const updatedJob = await prisma.job.update({

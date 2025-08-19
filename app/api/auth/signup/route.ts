@@ -1,13 +1,12 @@
 import { NextRequest, NextResponse } from "next/server"
-import { db } from "@/lib/db"
-import { UserRole } from "@prisma/client"
+import { prisma } from '@/lib/prisma'
 
 export async function POST(request: NextRequest) {
   try {
     const { email, name, role } = await request.json()
 
     // Check if user already exists
-    const existingUser = await db.user.findUnique({
+    const existingUser = await prisma.user.findUnique({
       where: { email }
     })
 
@@ -19,17 +18,17 @@ export async function POST(request: NextRequest) {
     }
 
     // Create new user
-    const user = await db.user.create({
+    const user = await prisma.user.create({
       data: {
         email,
         name,
-        role: role as UserRole,
+        role: role || 'CANDIDATE',
       }
     })
 
     // Create profile based on role
-    if (role === "candidate") {
-      await db.profile.create({
+    if (role === "candidate" || !role) {
+      await prisma.profile.create({
         data: {
           userId: user.id,
           firstName: name?.split(" ")[0] || "",
@@ -37,7 +36,7 @@ export async function POST(request: NextRequest) {
         }
       })
     } else if (role === "recruiter") {
-      await db.company.create({
+      await prisma.company.create({
         data: {
           userId: user.id,
           name: `${name}'s Company`, // Placeholder

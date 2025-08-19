@@ -174,11 +174,15 @@ export default async function JobPage({ params }: JobPageProps) {
               <div className="space-y-2">
                 <h3 className="font-semibold">Required Skills</h3>
                 <div className="flex flex-wrap gap-2">
-                  {job.skills.map((skill) => (
-                    <Badge key={skill} variant="secondary">
-                      {skill}
-                    </Badge>
-                  ))}
+                  {job.skills ? (
+                    (typeof job.skills === 'string' ? job.skills.split(',').map(s => s.trim()) : job.skills).map((skill: string) => (
+                      <Badge key={skill} variant="secondary">
+                        {skill}
+                      </Badge>
+                    ))
+                  ) : (
+                    <span className="text-sm text-muted-foreground">No specific skills listed</span>
+                  )}
                 </div>
               </div>
             </CardContent>

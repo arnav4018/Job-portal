@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
       data: {
         userId: session.user.id,
         title: validatedData.title,
-        data: validatedData,
+        data: JSON.stringify(validatedData),
         isDefault: isFirstResume,
       },
     })

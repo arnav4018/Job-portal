@@ -3,7 +3,6 @@ import { getServerSession } from 'next-auth'
 import { prisma } from '@/lib/prisma'
 import { authOptions } from '@/lib/auth'
 import { applicationSchema } from '@/lib/validations'
-
 import { calculateSkillMatch } from '@/lib/utils'
 
 // GET /api/applications - Get user's applications
@@ -31,8 +30,6 @@ export async function GET(request: NextRequest) {
       where.job = {
         recruiterId: session.user.id,
       }
-    } else {
-      // Admin can see all applications
     }
 
     const [applications, total] = await Promise.all([
@@ -176,20 +173,6 @@ export async function POST(request: NextRequest) {
         resume: true,
       },
     })
-
-    // Log audit
-    await prisma.audit.create({
-      data: {
-        userId: session.user.id,
-        action: 'CREATE',
-        resource: 'application',
-        resourceId: application.id,
-        newData: JSON.stringify(application),
-      },
-    })
-
-    // TODO: Send notification to recruiter
-    // TODO: Send confirmation email to candidate
 
     return NextResponse.json(application, { status: 201 })
   } catch (error) {

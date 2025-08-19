@@ -15,22 +15,24 @@ A comprehensive job portal web application built with Next.js 14, TypeScript, an
 - **Admin Panel**: Complete admin dashboard with analytics and user management
 
 ### Technical Features
-- **Next.js 14** with App Router
+- **Next.js 14** with App Router and Server Components
 - **TypeScript** for type safety
 - **PostgreSQL** with Prisma ORM
-- **NextAuth.js** for authentication
+- **NextAuth.js** for authentication (Google OAuth + Email Magic Links)
 - **Tailwind CSS** + shadcn/ui for styling
 - **S3/R2** for file storage
 - **Pusher** for real-time features
 - **Resend** for email notifications
 - **Comprehensive API** with validation and error handling
+- **Suspense Boundaries** for improved loading states
+- **Metadata Configuration** for SEO optimization
 
 ## 🛠️ Tech Stack
 
 - **Frontend**: Next.js 14, TypeScript, Tailwind CSS, shadcn/ui
 - **Backend**: Next.js API Routes, Prisma ORM
 - **Database**: PostgreSQL
-- **Authentication**: NextAuth.js (Google + Email)
+- **Authentication**: NextAuth.js (Google OAuth + Email Magic Links)
 - **File Storage**: AWS S3 / Cloudflare R2
 - **Real-time**: Pusher
 - **Email**: Resend
@@ -122,17 +124,30 @@ Visit `http://localhost:3000` to see the application.
 job-portal/
 ├── app/                    # Next.js 14 App Router
 │   ├── api/               # API routes
+│   │   ├── auth/         # Authentication endpoints
+│   │   │   ├── signup/route.ts    # User registration
+│   │   │   └── [...nextauth]/route.ts # NextAuth configuration
+│   │   ├── jobs/         # Job management
+│   │   ├── applications/ # Application handling
+│   │   ├── resumes/      # Resume management
+│   │   └── dashboard/    # Dashboard APIs
 │   ├── auth/              # Authentication pages
+│   │   ├── signin/       # Sign in page with Suspense
+│   │   ├── signup/       # Sign up page with Suspense
+│   │   ├── signin-content.tsx # Sign in form component
+│   │   └── signup-content.tsx # Sign up form component
 │   ├── jobs/              # Job-related pages
 │   ├── candidate/         # Candidate dashboard
 │   ├── recruiter/         # Recruiter dashboard
 │   ├── admin/             # Admin dashboard
-│   └── globals.css        # Global styles
+│   ├── globals.css        # Global styles
+│   └── layout.tsx         # Root layout with metadata
 ├── components/            # Reusable components
 │   ├── ui/               # shadcn/ui components
 │   ├── layout/           # Layout components
 │   ├── jobs/             # Job-related components
-│   └── forms/            # Form components
+│   ├── forms/            # Form components
+│   └── ui/loading-spinner.tsx # Loading states
 ├── lib/                  # Utility functions
 │   ├── prisma.ts         # Prisma client
 │   ├── auth.ts           # NextAuth configuration
@@ -141,7 +156,9 @@ job-portal/
 ├── prisma/               # Database schema and migrations
 │   ├── schema.prisma     # Database schema
 │   └── seed.ts           # Database seeding
-└── hooks/                # Custom React hooks
+├── hooks/                # Custom React hooks
+└── types/                # TypeScript type definitions
+    └── next-auth.d.ts    # NextAuth type extensions
 ```
 
 ## 🔐 Authentication
@@ -150,7 +167,15 @@ The app supports multiple authentication methods:
 
 - **Google OAuth**: One-click sign-in with Google
 - **Email Magic Links**: Passwordless authentication via email
+- **Custom Signup API**: Dedicated `/api/auth/signup` endpoint for user registration
 - **Role-based Access**: Automatic role assignment and protection
+- **Suspense Boundaries**: Improved loading states for auth pages
+
+### Authentication Flow
+1. **Sign Up**: New users register via `/auth/signup` page
+2. **Sign In**: Existing users sign in via `/auth/signin` page
+3. **OAuth**: Google OAuth integration for seamless authentication
+4. **Session Management**: Secure session handling with NextAuth.js
 
 ### Default Users (after seeding)
 
@@ -194,6 +219,7 @@ Built with shadcn/ui components:
 - Accessible components
 - Consistent design system
 - Mobile-first approach
+- Loading states with Suspense boundaries
 
 ## 📊 Database Schema
 
@@ -265,6 +291,7 @@ Production-ready security:
 - Rate limiting
 - Audit logging
 - Secure file uploads
+- API route protection
 
 ## 📈 Analytics & Reporting
 
@@ -314,8 +341,9 @@ npm run test:watch
 ## 📝 API Documentation
 
 ### Authentication
-- `POST /api/auth/signin` - Sign in user
 - `POST /api/auth/signup` - Register new user
+- `POST /api/auth/signin` - Sign in user (NextAuth)
+- `GET /api/auth/session` - Get current session
 
 ### Jobs
 - `GET /api/jobs` - Search and list jobs
@@ -329,10 +357,11 @@ npm run test:watch
 - `GET /api/applications` - List user applications
 - `PATCH /api/applications/[id]/status` - Update application status
 
-### Resumes
-- `GET /api/resumes` - List user resumes
-- `POST /api/resumes` - Create/update resume
-- `GET /api/resumes/[id]/pdf` - Download resume PDF
+### Dashboard APIs
+- `GET /api/dashboard/candidate/applications` - Candidate applications
+- `GET /api/dashboard/candidate/stats` - Candidate statistics
+- `GET /api/dashboard/recruiter/jobs` - Recruiter jobs
+- `GET /api/dashboard/admin/analytics` - Admin analytics
 
 ### Messaging
 - `GET /api/conversations` - List conversations
@@ -371,4 +400,4 @@ Future enhancements:
 
 ---
 
-Built with ❤️ using Next.js, TypeScript, and modern web technologies.
+Built with ❤️ using Next.js 14, TypeScript, and modern web technologies.
