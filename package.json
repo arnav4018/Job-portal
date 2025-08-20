@@ -28,6 +28,7 @@
     "validate-env": "tsx scripts/validate-env.ts",
     "validate-env:prod": "tsx scripts/validate-env.ts --production",
     "setup-production": "tsx scripts/setup-production.ts",
+    "setup:db": "prisma migrate deploy && npm run demo-seed",
     "deploy:vercel": "vercel --prod",
     "deploy:railway": "railway up",
     "deploy:production": "bash scripts/deploy-production.sh",
