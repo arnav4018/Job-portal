@@ -88,6 +88,15 @@ const demoData = {
 async function main() {
   console.log('🎭 Creating AI-powered demo database for client presentation...')
 
+  // Optional: Clean existing demo data (uncomment if needed)
+  // console.log('🧹 Cleaning existing demo data...')
+  // await prisma.application.deleteMany({})
+  // await prisma.job.deleteMany({})
+  // await prisma.consultingSession.deleteMany({})
+  // await prisma.quizAttempt.deleteMany({})
+  // await prisma.referral.deleteMany({})
+  // await prisma.notification.deleteMany({})
+
   // Create admin user
   const admin = await prisma.user.upsert({
     where: { email: 'admin@jobportal.com' },
@@ -230,8 +239,15 @@ async function main() {
 
   const candidates = []
   for (const candidateData of candidateProfiles) {
-    const candidate = await prisma.user.create({
-      data: {
+    const candidate = await prisma.user.upsert({
+      where: { email: candidateData.email },
+      update: {
+        name: candidateData.name,
+        role: 'CANDIDATE',
+        status: 'ACTIVE',
+        image: `https://via.placeholder.com/150x150/8B5CF6/FFFFFF?text=${candidateData.profile.firstName.charAt(0)}${candidateData.profile.lastName.charAt(0)}`,
+      },
+      create: {
         email: candidateData.email,
         name: candidateData.name,
         role: 'CANDIDATE',
@@ -444,8 +460,15 @@ async function main() {
   ]
 
   for (const expert of expertData) {
-    const expertUser = await prisma.user.create({
-      data: {
+    const expertUser = await prisma.user.upsert({
+      where: { email: expert.email },
+      update: {
+        name: expert.name,
+        role: 'EXPERT',
+        status: 'ACTIVE',
+        image: `https://via.placeholder.com/150x150/F59E0B/FFFFFF?text=${expert.name.split(' ').map(n => n[0]).join('')}`,
+      },
+      create: {
         email: expert.email,
         name: expert.name,
         role: 'EXPERT',
