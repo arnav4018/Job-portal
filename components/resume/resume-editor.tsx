@@ -227,9 +227,11 @@ export function ResumeEditor({ resume }: ResumeEditorProps) {
                 <Save className="h-4 w-4 mr-2" />
                 {isSaving ? 'Saving...' : 'Save Resume'}
               </Button>
-              <Button variant="outline" className="w-full">
-                <Eye className="h-4 w-4 mr-2" />
-                Preview
+              <Button variant="outline" className="w-full" asChild>
+                <Link href={`/resume-builder/${resume.id}/preview`}>
+                  <Eye className="h-4 w-4 mr-2" />
+                  Preview
+                </Link>
               </Button>
               <Button variant="outline" className="w-full">
                 <Download className="h-4 w-4 mr-2" />

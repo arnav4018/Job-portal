@@ -1,71 +1,33 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
-import { prisma } from '@/lib/prisma'
 import { authOptions } from '@/lib/auth'
+import { prisma } from '@/lib/prisma'
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const session = await getServerSession(authOptions)
     
     if (!session?.user || session.user.role !== 'CANDIDATE') {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { searchParams } = new URL(request.url)
-    const page = parseInt(searchParams.get('page') || '1')
-    const limit = parseInt(searchParams.get('limit') || '10')
-    const status = searchParams.get('status')
-    const skip = (page - 1) * limit
-
-    let where: any = {
-      candidateId: session.user.id
-    }
-
-    if (status && status !== 'all') {
-      where.status = status
-    }
-
-    const [applications, total] = await Promise.all([
-      prisma.application.findMany({
-        where,
-        include: {
-          job: {
-            include: {
-              company: {
-                select: {
-                  name: true,
-                  logo: true,
-                  location: true
-                }
-              }
-            }
-          },
-          interviews: {
-            orderBy: { scheduledAt: 'desc' },
-            take: 1
+    // Get recent applications (last 5)
+    const applications = await prisma.application.findMany({
+      where: { candidateId: session.user.id },
+      include: {
+        job: {
+          include: {
+            company: true
           }
-        },
-        orderBy: { appliedAt: 'desc' },
-        skip,
-        take: limit
-      }),
-      prisma.application.count({ where })
-    ])
-
-    return NextResponse.json({
-      applications,
-      pagination: {
-        page,
-        limit,
-        total,
-        pages: Math.ceil(total / limit)
-      }
+        }
+      },
+      orderBy: { appliedAt: 'desc' },
+      take: 5
     })
+
+    return NextResponse.json(applications)
   } catch (error) {
-    console.error('Candidate applications error:', error)
+    console.error('Dashboard applications error:', error)
     return NextResponse.json(
       { error: 'Failed to fetch applications' },
       { status: 500 }

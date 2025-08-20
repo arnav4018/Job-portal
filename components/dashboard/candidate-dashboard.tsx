@@ -35,8 +35,8 @@ interface RecentApplication {
     type: string
   }
   status: string
-  appliedAt: string
-  matchScore?: number
+  appliedAt: Date
+  matchScore: number | null
 }
 
 export default function CandidateDashboard() {
@@ -212,7 +212,7 @@ export default function CandidateDashboard() {
                         </span>
                         <span className="flex items-center">
                           <Clock className="w-3 h-3 mr-1" />
-                          Applied {new Date(application.appliedAt).toLocaleDateString()}
+                          Applied {application.appliedAt.toLocaleDateString()}
                         </span>
                       </div>
                     </div>

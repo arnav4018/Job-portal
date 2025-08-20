@@ -23,7 +23,6 @@
     "test:coverage": "jest --coverage",
     "test:ci": "jest --ci --coverage --watchAll=false",
     "analyze": "ANALYZE=true npm run build",
-
     "health-check": "tsx scripts/check-api-health.ts",
     "validate-env": "tsx scripts/validate-env.ts",
     "validate-env:prod": "tsx scripts/validate-env.ts --production",

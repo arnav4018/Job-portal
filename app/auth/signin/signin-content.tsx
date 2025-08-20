@@ -18,19 +18,59 @@ export default function SignInContent() {
   const searchParams = useSearchParams()
   const { toast } = useToast()
   
-  const [email, setEmail] = useState('')
+  const [formData, setFormData] = useState({
+    email: '',
+    password: ''
+  })
   const [isLoading, setIsLoading] = useState(false)
   const [isGoogleLoading, setIsGoogleLoading] = useState(false)
+  const [isEmailLoading, setIsEmailLoading] = useState(false)
   
   const callbackUrl = searchParams.get('callbackUrl') || '/'
 
-  const handleEmailSignIn = async (e: React.FormEvent) => {
+  const handleCredentialsSignIn = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
 
     try {
+      const result = await signIn('credentials', {
+        email: formData.email,
+        password: formData.password,
+        callbackUrl,
+        redirect: false,
+      })
+
+      if (result?.error) {
+        toast({
+          title: 'Error',
+          description: 'Invalid email or password. Please try again.',
+          variant: 'destructive',
+        })
+      } else {
+        toast({
+          title: 'Welcome back!',
+          description: 'You have been signed in successfully.',
+        })
+        router.push(callbackUrl)
+      }
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Something went wrong. Please try again.',
+        variant: 'destructive',
+      })
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleEmailSignIn = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setIsEmailLoading(true)
+
+    try {
       const result = await signIn('email', {
-        email,
+        email: formData.email,
         callbackUrl,
         redirect: false,
       })
@@ -54,7 +94,7 @@ export default function SignInContent() {
         variant: 'destructive',
       })
     } finally {
-      setIsLoading(false)
+      setIsEmailLoading(false)
     }
   }
 
@@ -114,16 +154,28 @@ export default function SignInContent() {
             </div>
           </div>
           
-          {/* Email Sign In */}
-          <form onSubmit={handleEmailSignIn} className="space-y-4">
+          {/* Credentials Sign In */}
+          <form onSubmit={handleCredentialsSignIn} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
                 type="email"
                 placeholder="Enter your email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                required
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="password">Password</Label>
+              <Input
+                id="password"
+                type="password"
+                placeholder="Enter your password"
+                value={formData.password}
+                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                 required
               />
             </div>
@@ -132,9 +184,32 @@ export default function SignInContent() {
               {isLoading ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               ) : (
+                <Briefcase className="mr-2 h-4 w-4" />
+              )}
+              Sign In
+            </Button>
+          </form>
+          
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <Separator className="w-full" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-background px-2 text-muted-foreground">
+                Or use magic link
+              </span>
+            </div>
+          </div>
+          
+          {/* Email Magic Link */}
+          <form onSubmit={handleEmailSignIn} className="space-y-4">
+            <Button type="submit" variant="outline" className="w-full" disabled={isEmailLoading}>
+              {isEmailLoading ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
                 <Mail className="mr-2 h-4 w-4" />
               )}
-              Send sign-in link
+              Send magic link to {formData.email || 'your email'}
             </Button>
           </form>
           

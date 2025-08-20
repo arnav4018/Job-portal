@@ -22,6 +22,7 @@ export default function SignUpContent() {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
+    password: '',
     role: searchParams.get('role') || 'CANDIDATE',
   })
   const [isLoading, setIsLoading] = useState(false)
@@ -34,28 +35,44 @@ export default function SignUpContent() {
     setIsLoading(true)
 
     try {
-      const result = await signIn('email', {
+      // First create the user account
+      const signupResponse = await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      })
+
+      if (!signupResponse.ok) {
+        const error = await signupResponse.json()
+        throw new Error(error.error || 'Failed to create account')
+      }
+
+      // Then sign them in
+      const result = await signIn('credentials', {
         email: formData.email,
+        password: formData.password,
         callbackUrl,
         redirect: false,
       })
 
       if (result?.error) {
         toast({
-          title: 'Error',
-          description: 'Failed to send sign-up email. Please try again.',
+          title: 'Account created but sign-in failed',
+          description: 'Please try signing in manually.',
           variant: 'destructive',
         })
+        router.push('/auth/signin')
       } else {
         toast({
-          title: 'Check your email',
-          description: 'We sent you a sign-up link. Be sure to check your spam folder.',
+          title: 'Account created successfully!',
+          description: 'Welcome to JobPortal Pro.',
         })
+        router.push(callbackUrl)
       }
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: 'Error',
-        description: 'Something went wrong. Please try again.',
+        description: error.message || 'Something went wrong. Please try again.',
         variant: 'destructive',
       })
     } finally {
@@ -142,6 +159,19 @@ export default function SignUpContent() {
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 required
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="password">Password</Label>
+              <Input
+                id="password"
+                type="password"
+                placeholder="Create a password"
+                value={formData.password}
+                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                required
+                minLength={6}
               />
             </div>
             

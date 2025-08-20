@@ -41,8 +41,8 @@ interface RecruiterStats {
 interface Application {
   id: string
   status: string
-  matchScore: number
-  appliedAt: string
+  matchScore: number | null
+  appliedAt: Date
   droppedOut: boolean
   flaggedForDropout: boolean
   job: {

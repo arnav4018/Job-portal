@@ -1,87 +1,46 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
-import { prisma } from '@/lib/prisma'
 import { authOptions } from '@/lib/auth'
+import { prisma } from '@/lib/prisma'
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const session = await getServerSession(authOptions)
     
     if (!session?.user || session.user.role !== 'CANDIDATE') {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     // Get candidate statistics
-    const [
-      totalApplications,
-      pendingApplications,
-      interviewsScheduled,
-      totalResumes,
-      profileViews,
-      quizAttempts
-    ] = await Promise.all([
+    const [appliedJobs, resumeCount, profileViews] = await Promise.all([
       prisma.application.count({
         where: { candidateId: session.user.id }
-      }),
-      prisma.application.count({
-        where: { 
-          candidateId: session.user.id,
-          status: { in: ['APPLIED', 'SHORTLISTED'] }
-        }
-      }),
-      prisma.interview.count({
-        where: { 
-          candidateId: session.user.id,
-          status: { in: ['SCHEDULED', 'CONFIRMED'] }
-        }
       }),
       prisma.resume.count({
         where: { userId: session.user.id }
       }),
-      // Profile views would need to be tracked separately
-      0,
-      prisma.quizAttempt.count({
-        where: { userId: session.user.id }
-      })
+      // For now, return mock data for profile views
+      Promise.resolve(12)
     ])
 
-    // Get recent applications with status
-    const recentApplications = await prisma.application.findMany({
-      where: { candidateId: session.user.id },
-      include: {
-        job: {
-          select: {
-            title: true,
-            company: {
-              select: {
-                name: true
-              }
-            }
-          }
-        }
-      },
-      orderBy: { appliedAt: 'desc' },
-      take: 5
+    // Get total resume downloads
+    const resumes = await prisma.resume.findMany({
+      where: { userId: session.user.id },
+      select: { downloadCount: true }
     })
 
-    const stats = {
-      totalApplications,
-      pendingApplications,
-      interviewsScheduled,
-      totalResumes,
-      profileViews,
-      quizAttempts,
-      recentApplications
-    }
+    const resumeDownloads = resumes.reduce((total, resume) => total + resume.downloadCount, 0)
 
-    return NextResponse.json(stats)
+    return NextResponse.json({
+      appliedJobs,
+      savedJobs: 0, // TODO: Implement saved jobs feature
+      profileViews,
+      resumeDownloads
+    })
   } catch (error) {
-    console.error('Candidate stats error:', error)
+    console.error('Dashboard stats error:', error)
     return NextResponse.json(
-      { error: 'Failed to fetch candidate stats' },
+      { error: 'Failed to fetch stats' },
       { status: 500 }
     )
   }
