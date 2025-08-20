@@ -51,7 +51,7 @@ const demoData = {
       logo: 'https://via.placeholder.com/200x200/EA580C/FFFFFF?text=NR'
     }
   ],
-  
+
   users: [
     // Recruiters
     {
@@ -87,7 +87,7 @@ const demoData = {
 
 async function main() {
   console.log('🎭 Creating AI-powered demo database for client presentation...')
-  
+
   // Create admin user
   const admin = await prisma.user.upsert({
     where: { email: 'admin@jobportal.com' },
@@ -115,7 +115,7 @@ async function main() {
   for (let i = 0; i < demoData.companies.length; i++) {
     const companyData = demoData.companies[i]
     const userData = demoData.users[i % demoData.users.length]
-    
+
     const recruiter = await prisma.user.upsert({
       where: { email: userData.email },
       update: {},
@@ -130,7 +130,7 @@ async function main() {
         }
       }
     })
-    
+
     const company = await prisma.company.upsert({
       where: { userId: recruiter.id },
       update: {},
@@ -146,10 +146,10 @@ async function main() {
         verified: true
       }
     })
-    
+
     recruiters.push({ recruiter, company })
   }
-  
+
   // Create diverse candidate profiles
   const candidateProfiles = [
     {
@@ -333,7 +333,7 @@ async function main() {
   for (let i = 0; i < jobPostings.length; i++) {
     const jobData = jobPostings[i]
     const { recruiter, company } = recruiters[i % recruiters.length]
-    
+
     const job = await prisma.job.create({
       data: {
         ...jobData,
@@ -345,38 +345,38 @@ async function main() {
     })
     jobs.push(job)
   }
-  
+
   // Create applications with realistic data
   const applications: any[] = []
   for (const job of jobs) {
     // Each job gets 3-5 applications
     const numApplications = Math.floor(Math.random() * 3) + 3
     const jobSkills = JSON.parse(job.skills || '[]')
-    
+
     for (let i = 0; i < numApplications; i++) {
       const candidate = candidates[Math.floor(Math.random() * candidates.length)]
-      
+
       // Check if candidate already applied to this job
-      const existingApp = applications.find(app => 
+      const existingApp = applications.find(app =>
         app.jobId === job.id && app.candidateId === candidate.id
       )
       if (existingApp) continue
-      
+
       // Calculate skill match score
       const candidateSkills = JSON.parse(candidate.profile?.skills || '[]')
-      const matchingSkills = jobSkills.filter((skill: string) => 
-        candidateSkills.some((cSkill: string) => 
+      const matchingSkills = jobSkills.filter((skill: string) =>
+        candidateSkills.some((cSkill: string) =>
           cSkill.toLowerCase().includes(skill.toLowerCase()) ||
           skill.toLowerCase().includes(cSkill.toLowerCase())
         )
       )
-      const matchScore = jobSkills.length > 0 ? 
+      const matchScore = jobSkills.length > 0 ?
         Math.round((matchingSkills.length / jobSkills.length) * 100) : 0
-      
+
       // Random application status
       const statuses = ['APPLIED', 'SHORTLISTED', 'INTERVIEW_SCHEDULED', 'INTERVIEW_COMPLETED', 'HIRED', 'REJECTED']
       const status = statuses[Math.floor(Math.random() * statuses.length)]
-      
+
       const application = await prisma.application.create({
         data: {
           jobId: job.id,
@@ -385,9 +385,9 @@ async function main() {
           matchScore,
           appliedAt: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000),
           coverLetter: `I am excited to apply for the ${job.title} position. My experience in ${candidateSkills.slice(0, 3).join(', ')} makes me a strong candidate for this role.`,
-          notes: status === 'REJECTED' ? 'Skills not matching requirements' : 
-                 status === 'HIRED' ? 'Excellent candidate, great cultural fit' : 
-                 'Under review'
+          notes: status === 'REJECTED' ? 'Skills not matching requirements' :
+            status === 'HIRED' ? 'Excellent candidate, great cultural fit' :
+              'Under review'
         }
       })
       applications.push(application)
@@ -395,14 +395,14 @@ async function main() {
   }
 
   // Create interviews for some applications
-  const interviewApplications = applications.filter(app => 
+  const interviewApplications = applications.filter(app =>
     ['INTERVIEW_SCHEDULED', 'INTERVIEW_COMPLETED', 'HIRED'].includes(app.status)
   )
-  
+
   for (const app of interviewApplications.slice(0, 10)) {
     const interviewTypes = ['VIDEO', 'PHONE', 'IN_PERSON', 'TECHNICAL']
     const type = interviewTypes[Math.floor(Math.random() * interviewTypes.length)]
-    
+
     await prisma.interview.create({
       data: {
         applicationId: app.id,
@@ -411,8 +411,8 @@ async function main() {
         status: app.status === 'INTERVIEW_COMPLETED' || app.status === 'HIRED' ? 'COMPLETED' : 'SCHEDULED',
         scheduledAt: new Date(Date.now() + Math.random() * 14 * 24 * 60 * 60 * 1000),
         duration: type === 'TECHNICAL' ? 90 : 60,
-        location: type === 'VIDEO' ? 'https://meet.google.com/abc-defg-hij' : 
-                 type === 'PHONE' ? '+91-9876543210' : 'Office Conference Room A',
+        location: type === 'VIDEO' ? 'https://meet.google.com/abc-defg-hij' :
+          type === 'PHONE' ? '+91-9876543210' : 'Office Conference Room A',
         confirmationSent: true,
         reminderSent: Math.random() > 0.5,
         notes: 'Standard interview process',
@@ -420,7 +420,7 @@ async function main() {
       }
     })
   }
-  
+
   // Create expert profiles
   const expertData = [
     {
@@ -499,13 +499,13 @@ async function main() {
       })
     }
   }
-  
+
   // Create referrals
   for (let i = 0; i < 5; i++) {
     const referrer = candidates[Math.floor(Math.random() * candidates.length)]
     const job = jobs[Math.floor(Math.random() * jobs.length)]
     const referred = candidates[Math.floor(Math.random() * candidates.length)]
-    
+
     if (referrer.id !== referred.id) {
       await prisma.referral.create({
         data: {
@@ -527,7 +527,7 @@ async function main() {
     for (let i = 0; i < 10; i++) {
       const candidate = candidates[Math.floor(Math.random() * candidates.length)]
       const score = Math.floor(Math.random() * 40) + 60 // 60-100% scores
-      
+
       await prisma.quizAttempt.create({
         data: {
           quizId: quiz.id,

@@ -25,7 +25,8 @@ export async function JobsList({ searchParams }: JobsListProps) {
   })
   
   // Fetch jobs from API
-  const response = await fetch(`http://localhost:3000/api/jobs?${params.toString()}`, {
+  const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000'
+  const response = await fetch(`${baseUrl}/api/jobs?${params.toString()}`, {
     cache: 'no-store',
   })
   
