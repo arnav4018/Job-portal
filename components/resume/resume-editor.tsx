@@ -14,8 +14,7 @@ import Link from 'next/link'
 interface Resume {
   id: string
   title: string
-  content: string
-  template: string
+  data: string
   isDefault: boolean
 }
 
@@ -69,7 +68,7 @@ export function ResumeEditor({ resume }: ResumeEditorProps) {
   const [title, setTitle] = useState(resume.title)
   const [content, setContent] = useState<ResumeContent>(() => {
     try {
-      return JSON.parse(resume.content)
+      return JSON.parse(resume.data)
     } catch {
       return {
         personalInfo: {},
@@ -96,7 +95,7 @@ export function ResumeEditor({ resume }: ResumeEditorProps) {
         },
         body: JSON.stringify({
           title,
-          content,
+          data: content,
         }),
       })
 

@@ -44,11 +44,11 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { title, content, template = 'modern' } = body
+    const { title, data } = body
 
-    if (!title || !content) {
+    if (!title || !data) {
       return NextResponse.json(
-        { error: 'Title and content are required' },
+        { error: 'Title and data are required' },
         { status: 400 }
       )
     }
@@ -64,8 +64,7 @@ export async function POST(request: NextRequest) {
       data: {
         userId: session.user.id,
         title,
-        content: JSON.stringify(content),
-        template,
+        data: JSON.stringify(data),
         isDefault: isFirstResume, // First resume becomes default
       }
     })
@@ -76,7 +75,7 @@ export async function POST(request: NextRequest) {
       action: 'CREATE',
       resource: 'resume',
       resourceId: resume.id,
-      newData: JSON.stringify({ title, template }),
+      newData: JSON.stringify({ title }),
       ipAddress: request.headers.get('x-forwarded-for') || 'unknown',
       userAgent: request.headers.get('user-agent') || 'unknown',
     })

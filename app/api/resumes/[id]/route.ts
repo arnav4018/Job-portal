@@ -59,7 +59,7 @@ export async function PUT(
     }
 
     const body = await request.json()
-    const { title, content, template, isDefault } = body
+    const { title, data, isDefault } = body
 
     // Verify ownership
     const existingResume = await prisma.resume.findUnique({
@@ -91,8 +91,7 @@ export async function PUT(
       where: { id: params.id },
       data: {
         title: title || existingResume.title,
-        content: content ? JSON.stringify(content) : existingResume.content,
-        template: template || existingResume.template,
+        data: data ? JSON.stringify(data) : existingResume.data,
         isDefault: isDefault !== undefined ? isDefault : existingResume.isDefault,
       }
     })

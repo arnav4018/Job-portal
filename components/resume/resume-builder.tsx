@@ -15,11 +15,10 @@ import Link from 'next/link'
 interface Resume {
   id: string
   title: string
-  template: string
   isDefault: boolean
   downloadCount: number
-  createdAt: string
-  updatedAt: string
+  createdAt: Date
+  updatedAt: Date
 }
 
 interface ResumeBuilderProps {
@@ -75,8 +74,7 @@ export function ResumeBuilder({ existingResumes }: ResumeBuilderProps) {
         },
         body: JSON.stringify({
           title: newResumeTitle,
-          template: selectedTemplate,
-          content: {
+          data: {
             personalInfo: {},
             experience: [],
             education: [],
@@ -222,7 +220,7 @@ export function ResumeBuilder({ existingResumes }: ResumeBuilderProps) {
                         )}
                       </div>
                       <p className="text-sm text-muted-foreground">
-                        Template: {resume.template} • Updated {new Date(resume.updatedAt).toLocaleDateString()}
+                        Updated {resume.updatedAt.toLocaleDateString()}
                       </p>
                       <div className="flex items-center space-x-4 mt-1">
                         <span className="text-xs text-muted-foreground flex items-center">

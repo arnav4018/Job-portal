@@ -12,7 +12,7 @@ interface ResumeEditPageProps {
 
 export default async function ResumeEditPage({ params }: ResumeEditPageProps) {
   const session = await getServerSession(authOptions)
-  
+
   if (!session?.user) {
     redirect('/auth/signin')
   }
@@ -23,7 +23,7 @@ export default async function ResumeEditPage({ params }: ResumeEditPageProps) {
 
   // Get the resume
   const resume = await prisma.resume.findUnique({
-    where: { 
+    where: {
       id: params.id,
       userId: session.user.id // Ensure user owns this resume
     }
