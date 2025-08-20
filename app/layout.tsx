@@ -8,6 +8,7 @@ import { Toaster } from '@/components/ui/toaster'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXTAUTH_URL || 'http://localhost:3000'),
   title: 'JobPortal Pro - Find Your Dream Job',
   description: 'A comprehensive job portal connecting talented candidates with top employers. Build your resume, apply to jobs, and grow your career.',
   keywords: 'jobs, careers, employment, resume builder, job search, hiring, recruitment',

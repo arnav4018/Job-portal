@@ -19,7 +19,7 @@ import {
   XCircle
 } from 'lucide-react'
 import Link from 'next/link'
-import { formatRelativeTime } from '@/lib/utils'
+import { getRelativeTime } from '@/lib/utils'
 
 export default async function CandidateDashboard() {
   const session = await getServerSession(authOptions)
@@ -178,7 +178,7 @@ export default async function CandidateDashboard() {
                         {application.job.company.name}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        Applied {formatRelativeTime(application.appliedAt)}
+                        Applied {getRelativeTime(application.appliedAt)}
                       </p>
                     </div>
                     <div className="flex items-center space-x-2">
@@ -231,7 +231,7 @@ export default async function CandidateDashboard() {
                     <div className="flex-1">
                       <h4 className="font-semibold">{resume.title}</h4>
                       <p className="text-sm text-muted-foreground">
-                        Updated {formatRelativeTime(resume.updatedAt)}
+                        Updated {getRelativeTime(resume.updatedAt)}
                       </p>
                       <div className="flex items-center space-x-2 mt-1">
                         {resume.isDefault && (

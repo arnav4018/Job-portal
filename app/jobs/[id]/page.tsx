@@ -21,7 +21,7 @@ import {
   Share2,
   Bookmark
 } from 'lucide-react'
-import { formatCurrency, formatRelativeTime, getInitials } from '@/lib/utils'
+import { formatCurrency, getRelativeTime, getInitials } from '@/lib/utils'
 import Link from 'next/link'
 
 interface JobPageProps {
@@ -123,7 +123,7 @@ export default async function JobPage({ params }: JobPageProps) {
                       </div>
                       <div className="flex items-center">
                         <Clock className="h-4 w-4 mr-1" />
-                        {formatRelativeTime(job.createdAt)}
+                        {getRelativeTime(job.createdAt)}
                       </div>
                       <div className="flex items-center">
                         <Users className="h-4 w-4 mr-1" />
@@ -233,7 +233,7 @@ export default async function JobPage({ params }: JobPageProps) {
                     Application Status: {userApplication.status}
                   </Badge>
                   <p className="text-sm text-muted-foreground">
-                    Applied on {formatRelativeTime(userApplication.appliedAt)}
+                    Applied on {getRelativeTime(userApplication.appliedAt)}
                   </p>
                   <Button variant="outline" className="w-full" asChild>
                     <Link href="/candidate/applications">

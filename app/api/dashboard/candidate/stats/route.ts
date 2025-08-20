@@ -1,46 +1,87 @@
-import { NextRequest, NextResponse } from "next/server"
-import { getServerSession } from "next-auth/next"
-import { authOptions } from "@/lib/auth"
-import { db } from "@/lib/db"
-
-export const dynamic = 'force-dynamic'
+import { NextRequest, NextResponse } from 'next/server'
+import { getServerSession } from 'next-auth'
+import { prisma } from '@/lib/prisma'
+import { authOptions } from '@/lib/auth'
 
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
     
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    if (!session?.user || session.user.role !== 'CANDIDATE') {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      )
     }
 
-    const userId = session.user.id
-
-    // Get candidate stats
-    const [appliedJobs, savedJobs, profileViews, resumeDownloads] = await Promise.all([
-      db.application.count({
-        where: { candidateId: userId }
+    // Get candidate statistics
+    const [
+      totalApplications,
+      pendingApplications,
+      interviewsScheduled,
+      totalResumes,
+      profileViews,
+      quizAttempts
+    ] = await Promise.all([
+      prisma.application.count({
+        where: { candidateId: session.user.id }
       }),
-      db.jobSearch.count({
-        where: { userId }
+      prisma.application.count({
+        where: { 
+          candidateId: session.user.id,
+          status: { in: ['APPLIED', 'SHORTLISTED'] }
+        }
       }),
-      // Mock profile views for now
-      Promise.resolve(Math.floor(Math.random() * 100) + 50),
-      db.resume.aggregate({
-        where: { userId },
-        _sum: { downloadCount: true }
+      prisma.interview.count({
+        where: { 
+          candidateId: session.user.id,
+          status: { in: ['SCHEDULED', 'CONFIRMED'] }
+        }
+      }),
+      prisma.resume.count({
+        where: { userId: session.user.id }
+      }),
+      // Profile views would need to be tracked separately
+      0,
+      prisma.quizAttempt.count({
+        where: { userId: session.user.id }
       })
     ])
 
-    return NextResponse.json({
-      appliedJobs,
-      savedJobs,
-      profileViews,
-      resumeDownloads: resumeDownloads._sum.downloadCount || 0
+    // Get recent applications with status
+    const recentApplications = await prisma.application.findMany({
+      where: { candidateId: session.user.id },
+      include: {
+        job: {
+          select: {
+            title: true,
+            company: {
+              select: {
+                name: true
+              }
+            }
+          }
+        }
+      },
+      orderBy: { appliedAt: 'desc' },
+      take: 5
     })
+
+    const stats = {
+      totalApplications,
+      pendingApplications,
+      interviewsScheduled,
+      totalResumes,
+      profileViews,
+      quizAttempts,
+      recentApplications
+    }
+
+    return NextResponse.json(stats)
   } catch (error) {
-    console.error("Error fetching candidate stats:", error)
+    console.error('Candidate stats error:', error)
     return NextResponse.json(
-      { error: "Internal server error" },
+      { error: 'Failed to fetch candidate stats' },
       { status: 500 }
     )
   }

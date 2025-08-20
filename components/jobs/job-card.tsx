@@ -11,7 +11,7 @@ import {
   Star,
   ExternalLink
 } from 'lucide-react'
-import { formatCurrency, formatRelativeTime, getInitials } from '@/lib/utils'
+import { formatCurrency, getRelativeTime, getInitials } from '@/lib/utils'
 
 interface JobCardProps {
   job: {
@@ -84,7 +84,7 @@ export function JobCard({ job }: JobCardProps) {
                 {job.company.name}
               </p>
               <p className="text-xs text-muted-foreground">
-                {formatRelativeTime(job.createdAt)}
+                {getRelativeTime(job.createdAt)}
               </p>
             </div>
           </div>
