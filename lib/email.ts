@@ -1,7 +1,21 @@
 import { Resend } from 'resend'
 import { prisma } from './prisma'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
+// Lazy initialization of Resend client
+let resend: Resend | null = null
+
+function getResendClient(): Resend | null {
+  if (!process.env.RESEND_API_KEY) {
+    console.warn('RESEND_API_KEY not configured, email functionality disabled')
+    return null
+  }
+  
+  if (!resend) {
+    resend = new Resend(process.env.RESEND_API_KEY)
+  }
+  
+  return resend
+}
 
 interface EmailData {
   to: string
@@ -12,6 +26,13 @@ interface EmailData {
 
 export async function sendEmail({ to, subject, template, data }: EmailData) {
   try {
+    const resendClient = getResendClient()
+    
+    if (!resendClient) {
+      console.warn('Email service not configured, skipping email send')
+      return false
+    }
+
     // Get email template from database
     const emailTemplate = await prisma.emailTemplate.findUnique({
       where: { name: template, isActive: true },
@@ -34,7 +55,7 @@ export async function sendEmail({ to, subject, template, data }: EmailData) {
     })
 
     // Send email
-    const result = await resend.emails.send({
+    const result = await resendClient.emails.send({
       from: process.env.FROM_EMAIL || 'noreply@jobportal.com',
       to,
       subject: emailSubject,

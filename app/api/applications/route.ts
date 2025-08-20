@@ -4,7 +4,7 @@ import { prisma } from '@/lib/prisma'
 import { authOptions } from '@/lib/auth'
 import { applicationSchema } from '@/lib/validations'
 import { calculateSkillMatch } from '@/lib/utils'
-import { sendEmail } from '@/lib/email'
+// Email service imported dynamically to avoid build-time issues
 import { createAuditLog } from '@/lib/audit'
 
 // GET /api/applications - Get user's applications with advanced filtering
@@ -261,6 +261,8 @@ export async function POST(request: NextRequest) {
 
     // Send email notification to recruiter (async)
     try {
+      const { sendEmail } = await import('@/lib/email')
+
       await sendEmail({
         to: job.recruiter.email,
         subject: `New Application for ${job.title}`,
@@ -411,6 +413,8 @@ export async function PATCH(request: NextRequest) {
 
     // Send email notification (async)
     try {
+      const { sendEmail } = await import('@/lib/email')
+
       await sendEmail({
         to: application.candidate.email,
         subject: `Application Status Update - ${application.job.title}`,

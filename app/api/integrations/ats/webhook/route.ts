@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { sendEmail } from '@/lib/email'
+// Email service imported dynamically to avoid build-time issues
 import { createAuditLog } from '@/lib/audit'
 
 // POST /api/integrations/ats/webhook - Handle ATS webhook for hire tracking
@@ -131,6 +131,8 @@ export async function POST(request: NextRequest) {
 
         // Send confirmation email to candidate
         try {
+          const { sendEmail } = await import('@/lib/email')
+
           await sendEmail({
             to: application.candidate.email,
             subject: `Congratulations! You've been hired for ${application.job.title}`,

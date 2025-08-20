@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { prisma } from '@/lib/prisma'
 import { authOptions } from '@/lib/auth'
-import { sendInterviewConfirmation, sendInterviewReminder } from '@/lib/email'
+// Email service imported dynamically to avoid build-time issues
 import { createAuditLog } from '@/lib/audit'
 
 // POST /api/interviews/[id]/confirmation - Send interview confirmation
@@ -60,6 +60,8 @@ export async function POST(
     const job = interview.application.job
 
     try {
+      const { sendInterviewConfirmation, sendInterviewReminder } = await import('@/lib/email')
+      
       if (type === 'confirmation') {
         // Send confirmation email
         await sendInterviewConfirmation({

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { prisma } from '@/lib/prisma'
 import { authOptions } from '@/lib/auth'
-import { sendEmail } from '@/lib/email'
+// Import email service conditionally to avoid build-time issues
 import { createAuditLog } from '@/lib/audit'
 
 // POST /api/applications/[id]/dropout - Mark application as dropped out
@@ -120,6 +120,9 @@ export async function POST(
 
     // Send email notifications
     try {
+      // Dynamically import email service to avoid build-time issues
+      const { sendEmail } = await import('@/lib/email')
+      
       if (reportedBy === 'candidate') {
         // Notify recruiter
         await sendEmail({

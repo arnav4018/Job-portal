@@ -3,7 +3,7 @@ import { getServerSession } from 'next-auth'
 import { prisma } from '@/lib/prisma'
 import { authOptions } from '@/lib/auth'
 import { referralSchema } from '@/lib/validations'
-import { sendEmail } from '@/lib/email'
+// Email service imported dynamically to avoid build-time issues
 import { createAuditLog } from '@/lib/audit'
 import { nanoid } from 'nanoid'
 
@@ -153,6 +153,9 @@ export async function POST(request: NextRequest) {
       try {
         const referralLink = `${process.env.NEXTAUTH_URL}/jobs/${job.id}?ref=${code}`
         
+        const { sendEmail } = await import('@/lib/email')
+
+        
         await sendEmail({
           to: validatedData.referredEmail,
           subject: `${session.user.name} referred you to a job opportunity`,
@@ -301,6 +304,8 @@ export async function PATCH(request: NextRequest) {
 
     // Send notification email
     try {
+      const { sendEmail } = await import('@/lib/email')
+
       await sendEmail({
         to: referral.referrer.email,
         subject: `Referral Status Update - ${referral.job.title}`,

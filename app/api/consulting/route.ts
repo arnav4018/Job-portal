@@ -3,7 +3,7 @@ import { getServerSession } from 'next-auth'
 import { prisma } from '@/lib/prisma'
 import { authOptions } from '@/lib/auth'
 import { consultingSessionSchema } from '@/lib/validations'
-import { sendEmail } from '@/lib/email'
+// Email service imported dynamically to avoid build-time issues
 import { createAuditLog } from '@/lib/audit'
 
 // GET /api/consulting - Get consulting sessions
@@ -196,6 +196,7 @@ export async function POST(request: NextRequest) {
 
     // Send confirmation emails (async)
     try {
+      const { sendEmail } = await import('@/lib/email')
       await Promise.all([
         sendEmail({
           to: expert.user.email,

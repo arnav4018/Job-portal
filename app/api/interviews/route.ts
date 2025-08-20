@@ -3,7 +3,7 @@ import { getServerSession } from 'next-auth'
 import { prisma } from '@/lib/prisma'
 import { authOptions } from '@/lib/auth'
 import { interviewSchema } from '@/lib/validations'
-import { sendInterviewConfirmation } from '@/lib/email'
+// Email service imported dynamically to avoid build-time issues
 import { createAuditLog } from '@/lib/audit'
 
 // GET /api/interviews - Get interviews
@@ -197,6 +197,7 @@ export async function POST(request: NextRequest) {
 
     // Send confirmation email (async)
     try {
+      const { sendInterviewConfirmation } = await import('@/lib/email')
       await sendInterviewConfirmation({
         candidateEmail: application.candidate.email,
         candidateName: application.candidate.name || 'Candidate',
