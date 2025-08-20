@@ -35,6 +35,13 @@ const nextConfig = {
   env: {
     NEXTAUTH_URL: process.env.NEXTAUTH_URL,
     NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
+    SKIP_DATABASE_VALIDATION: process.env.SKIP_DATABASE_VALIDATION,
+  },
+
+  // Build-time configuration
+  generateBuildId: async () => {
+    // Use a consistent build ID for better caching
+    return process.env.VERCEL_GIT_COMMIT_SHA || 'development'
   },
 
   // Security headers
