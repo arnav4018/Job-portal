@@ -17,6 +17,7 @@
     "db:seed": "tsx prisma/seed.ts",
     "demo-seed": "tsx prisma/demo-seed.ts",
     "generate-ai-data": "tsx scripts/generate-ai-data.ts",
+    "create-admin": "tsx scripts/create-admin.ts",
     "db:studio": "prisma studio",
     "test": "jest",
     "test:watch": "jest --watch",

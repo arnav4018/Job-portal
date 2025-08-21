@@ -26,6 +26,7 @@ import Link from 'next/link'
 
 interface JobPageProps {
   params: { id: string }
+  searchParams: { ref?: string }
 }
 
 const jobTypeLabels: Record<string, string> = {
@@ -44,7 +45,7 @@ const experienceLevelLabels: Record<string, string> = {
   'EXECUTIVE': 'Executive',
 }
 
-export default async function JobPage({ params }: JobPageProps) {
+export default async function JobPage({ params, searchParams }: JobPageProps) {
   const session = await getServerSession(authOptions)
   
   const job = await prisma.job.findUnique({
@@ -92,8 +93,51 @@ export default async function JobPage({ params }: JobPageProps) {
     ? `Up to ${formatCurrency(job.salaryMax, job.currency)}`
     : 'Salary not disclosed'
 
+  // Check if this is a referral link
+  const referralCode = searchParams.ref
+  let referralInfo = null
+  
+  if (referralCode) {
+    try {
+      referralInfo = await prisma.referral.findUnique({
+        where: { code: referralCode },
+        include: {
+          referrer: {
+            select: {
+              name: true,
+              profile: true,
+            },
+          },
+        },
+      })
+    } catch (error) {
+      console.error('Failed to fetch referral info:', error)
+    }
+  }
+
   return (
     <div className="container mx-auto px-4 py-8">
+      {/* Referral Banner */}
+      {referralInfo && (
+        <Card className="mb-6 border-blue-200 bg-blue-50">
+          <CardContent className="pt-6">
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                <Users className="h-5 w-5 text-blue-600" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-blue-900">
+                  You were referred by {referralInfo.referrer.name}
+                </h3>
+                <p className="text-sm text-blue-700">
+                  Apply now and help them earn a referral reward when you get hired!
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+      
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Main Content */}
         <div className="lg:col-span-2 space-y-6">
@@ -242,7 +286,7 @@ export default async function JobPage({ params }: JobPageProps) {
                   </Button>
                 </div>
               ) : canApply ? (
-                <ApplyButton jobId={job.id} />
+                <ApplyButton jobId={job.id} referralCode={searchParams.ref} />
               ) : !session ? (
                 <div className="text-center space-y-4">
                   <p className="text-sm text-muted-foreground">

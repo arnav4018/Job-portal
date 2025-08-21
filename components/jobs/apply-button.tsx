@@ -13,9 +13,10 @@ import { Loader2, FileText } from 'lucide-react'
 
 interface ApplyButtonProps {
   jobId: string
+  referralCode?: string
 }
 
-export function ApplyButton({ jobId }: ApplyButtonProps) {
+export function ApplyButton({ jobId, referralCode }: ApplyButtonProps) {
   const { data: session } = useSession()
   const router = useRouter()
   const { toast } = useToast()
@@ -69,6 +70,7 @@ export function ApplyButton({ jobId }: ApplyButtonProps) {
           jobId,
           resumeId: selectedResumeId,
           coverLetter: coverLetter.trim() || undefined,
+          referralCode: referralCode || undefined,
         }),
       })
 

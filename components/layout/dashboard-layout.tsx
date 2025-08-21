@@ -18,6 +18,7 @@ import {
   TrendingUp,
   Users,
   DollarSign,
+  Building,
   Menu,
   X,
   LogOut
@@ -38,24 +39,26 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     { name: "Find Jobs", href: "/jobs", icon: Search },
     { name: "Applications", href: "/dashboard/applications", icon: Briefcase },
     { name: "Resume Builder", href: "/resume-builder", icon: FileText },
+    { name: "Refer & Earn", href: "/referrals", icon: Users },
     { name: "Messages", href: "/dashboard/messages", icon: MessageSquare },
     { name: "Profile", href: "/profile", icon: User },
   ]
 
   const recruiterNavigation = [
-    { name: "Dashboard", href: "/dashboard", icon: Home },
-    { name: "Post Job", href: "/jobs/post", icon: Briefcase },
-    { name: "My Jobs", href: "/dashboard/jobs", icon: Search },
-    { name: "Candidates", href: "/dashboard/candidates", icon: Users },
+    { name: "Dashboard", href: "/recruiter", icon: Home },
+    { name: "Post Job", href: "/recruiter/jobs/post", icon: Briefcase },
+    { name: "My Jobs", href: "/recruiter/jobs", icon: Search },
+    { name: "Applications", href: "/recruiter/applications", icon: Users },
     { name: "Messages", href: "/dashboard/messages", icon: MessageSquare },
-    { name: "Analytics", href: "/dashboard/analytics", icon: TrendingUp },
-    { name: "Billing", href: "/dashboard/billing", icon: DollarSign },
+    { name: "Company Profile", href: "/recruiter/company", icon: Building },
+    { name: "Analytics", href: "/recruiter/analytics", icon: TrendingUp },
   ]
 
   const adminNavigation = [
-    { name: "Dashboard", href: "/dashboard", icon: Home },
+    { name: "Dashboard", href: "/admin", icon: Home },
     { name: "Users", href: "/admin/users", icon: Users },
     { name: "Jobs", href: "/admin/jobs", icon: Briefcase },
+    { name: "Companies", href: "/admin/companies", icon: Building },
     { name: "Analytics", href: "/admin/analytics", icon: TrendingUp },
     { name: "Settings", href: "/admin/settings", icon: Settings },
   ]

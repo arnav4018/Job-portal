@@ -156,6 +156,7 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json()
     const validatedData = applicationSchema.parse(body)
+    const referralCode = body.referralCode // Optional referral code
 
     // Check if job exists and is published
     const job = await prisma.job.findUnique({
@@ -200,6 +201,25 @@ export async function POST(request: NextRequest) {
     const candidateSkills = candidate?.profile?.skills ? JSON.parse(candidate.profile.skills) : []
     const jobSkills = job.skills ? JSON.parse(job.skills) : []
     const matchScore = calculateSkillMatch(jobSkills, candidateSkills)
+
+    // Check for referral code and update referral status
+    let referral = null
+    if (referralCode) {
+      referral = await prisma.referral.findUnique({
+        where: { code: referralCode },
+        include: { referrer: true },
+      })
+
+      if (referral && referral.jobId === validatedData.jobId) {
+        // Update referral with referred user if not already set
+        if (!referral.referredId) {
+          await prisma.referral.update({
+            where: { id: referral.id },
+            data: { referredId: session.user.id },
+          })
+        }
+      }
+    }
 
     // Create application with transaction
     const application = await prisma.$transaction(async (tx) => {
@@ -246,15 +266,39 @@ export async function POST(request: NextRequest) {
           userId: job.recruiterId,
           type: 'NEW_APPLICATION',
           title: 'New Job Application',
-          message: `${candidate?.name || 'A candidate'} applied for ${job.title}`,
+          message: `${candidate?.name || 'A candidate'} applied for ${job.title}${referral ? ' (via referral)' : ''}`,
           data: JSON.stringify({
             applicationId: newApplication.id,
             jobId: job.id,
             candidateId: session.user.id,
             matchScore,
+            referralId: referral?.id,
           }),
         },
       })
+
+      // Update referral status to APPLIED if referral exists
+      if (referral) {
+        await tx.referral.update({
+          where: { id: referral.id },
+          data: { status: 'APPLIED' },
+        })
+
+        // Notify referrer
+        await tx.notification.create({
+          data: {
+            userId: referral.referrerId,
+            type: 'REFERRAL_UPDATE',
+            title: 'Referral Application Submitted',
+            message: `Your referred candidate applied for ${job.title}`,
+            data: JSON.stringify({
+              referralId: referral.id,
+              jobId: job.id,
+              status: 'APPLIED',
+            }),
+          },
+        })
+      }
 
       return newApplication
     })

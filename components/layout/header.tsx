@@ -30,18 +30,8 @@ export function Header() {
   const { data: session, status } = useSession()
 
   const getDashboardLink = () => {
-    if (!session?.user?.role) return '/dashboard'
-    
-    switch (session.user.role) {
-      case 'ADMIN':
-        return '/admin'
-      case 'RECRUITER':
-        return '/recruiter'
-      case 'CANDIDATE':
-        return '/candidate'
-      default:
-        return '/dashboard'
-    }
+    // All roles use the same dashboard with role-based content
+    return '/dashboard'
   }
 
   const getRoleColor = (role: string) => {
@@ -92,13 +82,17 @@ export function Header() {
           ) : session ? (
             <div className="flex items-center space-x-2">
               {/* Notifications */}
-              <Button variant="ghost" size="icon">
-                <Bell className="h-4 w-4" />
+              <Button variant="ghost" size="icon" asChild>
+                <Link href="/dashboard">
+                  <Bell className="h-4 w-4" />
+                </Link>
               </Button>
 
               {/* Messages */}
-              <Button variant="ghost" size="icon">
-                <MessageSquare className="h-4 w-4" />
+              <Button variant="ghost" size="icon" asChild>
+                <Link href="/dashboard/messages">
+                  <MessageSquare className="h-4 w-4" />
+                </Link>
               </Button>
 
               {/* User Menu */}
@@ -148,15 +142,21 @@ export function Header() {
                   {session.user.role === 'CANDIDATE' && (
                     <>
                       <DropdownMenuItem asChild>
-                        <Link href="/candidate/applications">
+                        <Link href="/dashboard/applications">
                           <FileText className="mr-2 h-4 w-4" />
                           My Applications
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem asChild>
-                        <Link href="/candidate/resumes">
+                        <Link href="/resume-builder">
                           <FileText className="mr-2 h-4 w-4" />
                           My Resumes
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link href="/referrals">
+                          <Users className="mr-2 h-4 w-4" />
+                          Refer & Earn
                         </Link>
                       </DropdownMenuItem>
                     </>
@@ -174,6 +174,23 @@ export function Header() {
                         <Link href="/recruiter/applications">
                           <Users className="mr-2 h-4 w-4" />
                           Applications
+                        </Link>
+                      </DropdownMenuItem>
+                    </>
+                  )}
+
+                  {session.user.role === 'ADMIN' && (
+                    <>
+                      <DropdownMenuItem asChild>
+                        <Link href="/admin/users">
+                          <Users className="mr-2 h-4 w-4" />
+                          Manage Users
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link href="/admin/settings">
+                          <Settings className="mr-2 h-4 w-4" />
+                          System Settings
                         </Link>
                       </DropdownMenuItem>
                     </>
