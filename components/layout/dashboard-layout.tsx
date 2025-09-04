@@ -21,7 +21,11 @@ import {
   Building,
   Menu,
   X,
-  LogOut
+  LogOut,
+  Filter,
+  Zap,
+  Calendar,
+  BarChart3
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -40,6 +44,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     { name: "Applications", href: "/dashboard/applications", icon: Briefcase },
     { name: "Resume Builder", href: "/resume-builder", icon: FileText },
     { name: "Refer & Earn", href: "/referrals", icon: Users },
+    { name: "Smart Filters", href: "/filters", icon: Filter },
+    { name: "AI Features", href: "/ai", icon: Zap },
+    { name: "Interviews", href: "/interviews", icon: Calendar },
     { name: "Messages", href: "/dashboard/messages", icon: MessageSquare },
     { name: "Profile", href: "/profile", icon: User },
   ]
@@ -49,6 +56,10 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     { name: "Post Job", href: "/recruiter/jobs/post", icon: Briefcase },
     { name: "My Jobs", href: "/recruiter/jobs", icon: Search },
     { name: "Applications", href: "/recruiter/applications", icon: Users },
+    { name: "Smart Filters", href: "/filters", icon: Filter },
+    { name: "Credits", href: "/credits", icon: DollarSign },
+    { name: "AI Features", href: "/ai", icon: Zap },
+    { name: "Interviews", href: "/interviews", icon: Calendar },
     { name: "Messages", href: "/dashboard/messages", icon: MessageSquare },
     { name: "Company Profile", href: "/recruiter/company", icon: Building },
     { name: "Analytics", href: "/recruiter/analytics", icon: TrendingUp },
@@ -59,6 +70,10 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     { name: "Users", href: "/admin/users", icon: Users },
     { name: "Jobs", href: "/admin/jobs", icon: Briefcase },
     { name: "Companies", href: "/admin/companies", icon: Building },
+    { name: "Smart Filters", href: "/filters", icon: Filter },
+    { name: "Credits", href: "/credits", icon: DollarSign },
+    { name: "AI Features", href: "/ai", icon: Zap },
+    { name: "Interviews", href: "/interviews", icon: Calendar },
     { name: "Analytics", href: "/admin/analytics", icon: TrendingUp },
     { name: "Settings", href: "/admin/settings", icon: Settings },
   ]

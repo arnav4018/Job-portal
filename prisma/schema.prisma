@@ -10,6 +10,29 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// Enums for enhanced profile
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+  PREFER_NOT_TO_SAY
+}
+
+enum MaritalStatus {
+  SINGLE
+  MARRIED
+  DIVORCED
+  WIDOWED
+  PREFER_NOT_TO_SAY
+}
+
+enum WorkMode {
+  REMOTE
+  OFFICE
+  HYBRID
+  FLEXIBLE
+}
+
 // Auth Models
 model Account {
   id                String  @id @default(cuid())
@@ -65,6 +88,7 @@ model User {
   accounts      Account[]
   sessions      Session[]
   profile       Profile?
+  userProfile   UserProfile? // New enhanced profile
   company       Company?
   jobs          Job[]
   applications  Application[]
@@ -89,6 +113,102 @@ model User {
   @@map("users")
 }
 
+// Enhanced User Profile for new components
+model UserProfile {
+  id                    String   @id @default(cuid())
+  userId                String   @unique
+  
+  // Personal Information
+  firstName             String?
+  lastName              String?
+  dateOfBirth           DateTime?
+  gender                Gender?
+  maritalStatus         MaritalStatus?
+  nationality           String?
+  phone                 String?
+  alternatePhone        String?
+  address               String?
+  city                  String?
+  state                 String?
+  country               String   @default("India")
+  pincode               String?
+  
+  // Professional Information
+  currentDesignation    String?
+  currentCompany        String?
+  totalExperience       Float?
+  relevantExperience    Float?
+  currentCTC            Float?
+  expectedCTC           Float?
+  noticePeriod          Int?
+  negotiableNoticePeriod Boolean @default(false)
+  servingNoticePeriod   Boolean @default(false)
+  lastWorkingDay        DateTime?
+  reasonForChange       String?
+  willingToRelocate     Boolean @default(false)
+  preferredLocations    String[]
+  workMode              WorkMode?
+  
+  // Skills and Qualifications
+  skills                String? // JSON array of skills
+  primarySkills         String? // JSON array of primary skills
+  secondarySkills       String? // JSON array of secondary skills
+  certifications        String? // JSON array of certifications
+  languages             String? // JSON array of languages known
+  
+  // Education
+  education             String? // JSON array of education details
+  highestQualification  String?
+  specialization        String?
+  instituteName         String?
+  graduationYear        Int?
+  
+  // Employment History
+  workExperience        String? // JSON array of work experience
+  projects              String? // JSON array of projects
+  achievements          String? // JSON array of achievements
+  
+  // Documents & Verification
+  resumeUrl             String?
+  profilePhotoUrl       String?
+  aadharNumber          String? // Encrypted
+  panNumber             String? // Encrypted
+  passportNumber        String? // Encrypted
+  uanNumber             String?
+  pfAccountNumber       String?
+  
+  // Social Profiles
+  linkedinProfile       String?
+  githubProfile         String?
+  portfolioUrl          String?
+  website               String?
+  
+  // Preferences
+  jobAlertPreferences   String? // JSON object
+  privacySettings       String? // JSON object
+  communicationPreferences String? // JSON object
+  
+  // Profile Analytics
+  profileCompleteness   Float   @default(0.0)
+  profileViews          Int     @default(0)
+  searchAppearances     Int     @default(0)
+  
+  // System Fields
+  isVerified           Boolean @default(false)
+  verificationLevel    String  @default("BASIC") // BASIC, PHONE, EMAIL, DOCUMENT
+  lastActiveAt         DateTime?
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_profiles")
+}
+
+// Add relation to User model
+// We'll need to update User model to include userProfile relation
+
+// Keep original Profile model for backward compatibility
 model Profile {
   id          String   @id @default(cuid())
   userId      String   @unique
@@ -131,6 +251,106 @@ model Profile {
   @@map("profiles")
 }
 
+// Enhanced Company Profile for CompanyProfileManager
+model CompanyProfile {
+  id                String   @id @default(cuid())
+  companyId         String   @unique
+  
+  // Basic Company Information
+  companyName       String
+  legalName         String?
+  logo              String?
+  tagline           String?
+  description       String?
+  website           String?
+  linkedinUrl       String?
+  twitterUrl        String?
+  facebookUrl       String?
+  
+  // Company Details
+  foundedYear       Int?
+  employeeCount     String? // "1-10", "11-50", "51-200", "201-500", "501-1000", "1000+"
+  industry          String?
+  companyType       String? // "Startup", "MNC", "Corporate", "Government", "NGO"
+  headquarters      String?
+  locations         String? // JSON array of office locations
+  
+  // Culture & Values
+  mission           String?
+  vision            String?
+  values            String? // JSON array of company values
+  workEnvironment   String? // "Collaborative", "Fast-paced", "Remote-first", etc.
+  diversityPolicy   String?
+  
+  // Benefits & Perks
+  benefits          String? // JSON array of benefits
+  perks             String? // JSON array of perks
+  healthInsurance   Boolean @default(false)
+  lifeInsurance     Boolean @default(false)
+  flexibleHours     Boolean @default(false)
+  remoteWork        Boolean @default(false)
+  paidTimeOff       String? // PTO policy
+  parentalLeave     String? // Parental leave policy
+  
+  // Work Environment
+  workingDays       Int?     @default(5)
+  workTimings       String?  // JSON: {start: "09:00", end: "18:00"}
+  dressCode         String?  // "Formal", "Business Casual", "Casual"
+  officeType        String?  // "Open Office", "Cubicles", "Private Offices", "Hybrid"
+  
+  // Media & Gallery
+  officeImages      String? // JSON array of office photos
+  teamPhotos        String? // JSON array of team photos  
+  videoUrl          String? // Company introduction video
+  gallery           String? // JSON array of all media
+  
+  // Contact & Social
+  phone             String?
+  email             String?
+  address           String?
+  socialLinks       String? // JSON object of social media links
+  
+  // Verification & Status
+  verified          Boolean @default(false)
+  profileCompleteness Float @default(0.0)
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  company           Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  offices           Office[]
+  
+  @@map("company_profiles")
+}
+
+// Office Locations
+model Office {
+  id              String   @id @default(cuid())
+  companyProfileId String
+  name            String   // "Head Office", "Branch Office", "Regional Office"
+  address         String
+  city            String
+  state           String?
+  country         String   @default("India")
+  pincode         String?
+  phone           String?
+  email           String?
+  officeType      String?  // "Head Office", "Branch", "Regional", "Sales Office"
+  employeeCount   Int?
+  amenities       String?  // JSON array of office amenities
+  images          String?  // JSON array of office images
+  coordinates     String?  // JSON object with lat, lng
+  isHeadOffice    Boolean  @default(false)
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  companyProfile  CompanyProfile @relation(fields: [companyProfileId], references: [id], onDelete: Cascade)
+  
+  @@map("offices")
+}
+
+// Keep original Company model for backward compatibility
 model Company {
   id          String   @id @default(cuid())
   userId      String   @unique // Recruiter who owns this company
@@ -164,6 +384,7 @@ model Company {
   jobs Job[]
   commissions Commission[]
   hiringCredits HiringCredit[]
+  profile CompanyProfile?
 
   @@map("companies")
 }
@@ -255,6 +476,9 @@ model Resume {
   pdfUrl       String?  // S3 URL for PDF
   isDefault    Boolean  @default(false)
   downloadCount Int     @default(0)
+  // Resume watermarking
+  watermarkText String? @default("Hirely - Hire, Refer, Apply")
+  watermarkEnabled Boolean @default(true)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
@@ -673,12 +897,32 @@ model InterviewTimeSlot {
   endTime     String    // End time (HH:MM format)
   isBooked    Boolean   @default(false)
   bookedBy    String?   // Candidate ID who booked this slot
+  // Enhanced notification tracking
+  notificationSent Boolean @default(false)
+  whatsappSent Boolean @default(false)
+  emailSent Boolean @default(false)
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
   job Job @relation(fields: [jobId], references: [id], onDelete: Cascade)
 
   @@map("interview_time_slots")
+}
+
+// Skill Assessment System
+model SkillAssessment {
+  id          String   @id @default(cuid())
+  candidateId String
+  jobId       String
+  skills      String   // JSON array of assessed skills
+  scores      String   // JSON object of skill scores
+  totalScore  Float    // Overall assessment score (0-100)
+  status      String   @default("PENDING") // PENDING, IN_PROGRESS, COMPLETED
+  timeSpent   Int?     // Time spent in minutes
+  assessedAt  DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("skill_assessments")
 }
 
 // Referral Quality Scorecard
