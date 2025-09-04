@@ -1,5 +1,7 @@
 FROM node:18-alpine
 
+# Force Railway to rebuild with postinstall fixes - 2025-09-04
+
 # Install system dependencies
 RUN apk add --no-cache \
     libc6-compat \
