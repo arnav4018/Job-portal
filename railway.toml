@@ -1,0 +1,13 @@
+[build]
+builder = "dockerfile"
+
+[deploy]
+numReplicas = 1
+healthcheckPath = "/api/health"
+healthcheckTimeout = 300
+restartPolicyType = "ON_FAILURE"
+
+[env]
+NODE_ENV = "production"
+SKIP_DATABASE_VALIDATION = "true"
+SKIP_ENV_VALIDATION = "true"
