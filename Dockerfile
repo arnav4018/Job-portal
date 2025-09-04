@@ -4,15 +4,21 @@ FROM node:18-alpine
 RUN apk add --no-cache \
     libc6-compat \
     openssl \
-    bash
+    bash \
+    git
 
 WORKDIR /app
 
-# Copy package files
-COPY package.json package-lock.json* ./
+# Set npm configuration for better performance in Docker
+RUN npm config set fund false
+RUN npm config set audit-level none
 
-# Install all dependencies
-RUN npm ci
+# Copy package files
+COPY package.json package-lock.json ./
+
+# Clean npm cache and install dependencies
+RUN npm cache clean --force
+RUN npm ci --no-optional --no-audit --no-fund
 
 # Copy source code
 COPY . .
@@ -29,15 +35,14 @@ RUN npx prisma generate
 # Build the application
 RUN npm run build
 
-# Clean up dev dependencies to reduce image size
-RUN npm prune --production
-
 # Create non-root user
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
 # Change ownership of the app directory
 RUN chown -R nextjs:nodejs /app
+
+# Switch to non-root user
 USER nextjs
 
 # Expose port
