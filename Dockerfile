@@ -5,7 +5,10 @@ RUN apk add --no-cache \
     libc6-compat \
     openssl \
     bash \
-    git
+    git \
+    python3 \
+    make \
+    g++
 
 WORKDIR /app
 
@@ -13,16 +16,8 @@ WORKDIR /app
 RUN npm config set fund false
 RUN npm config set audit-level none
 
-# Copy package files
+# Copy package files first
 COPY package.json package-lock.json* ./
-
-# Clean npm cache and install dependencies
-RUN npm cache clean --force
-# Use npm install instead of npm ci to avoid checksum issues
-RUN npm install --production=false --no-optional --no-audit --no-fund
-
-# Copy source code
-COPY . .
 
 # Set environment variables for build
 ENV NODE_ENV=production
@@ -30,7 +25,16 @@ ENV NEXT_TELEMETRY_DISABLED=1
 ENV SKIP_DATABASE_VALIDATION=true
 ENV SKIP_ENV_VALIDATION=true
 
-# Generate Prisma client
+# Install dependencies with better error handling
+RUN npm cache clean --force && \
+    npm install --legacy-peer-deps --no-audit --no-fund || \
+    (echo "npm install failed, trying with different flags" && \
+     npm install --legacy-peer-deps --no-shrinkwrap --no-audit --no-fund)
+
+# Copy source code (including prisma directory)
+COPY . .
+
+# Generate Prisma client after copying source
 RUN npx prisma generate
 
 # Build the application
