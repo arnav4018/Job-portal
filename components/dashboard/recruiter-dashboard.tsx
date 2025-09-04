@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { useSession } from "next-auth/react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { LinkButton } from '@/components/ui/link-button'
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Select } from "@/components/ui/select"
@@ -107,14 +108,39 @@ export default function RecruiterDashboard() {
       if (statsRes.ok) {
         const statsData = await statsRes.json()
         setStats(statsData)
+      } else {
+        console.error("Failed to fetch stats:", await statsRes.text())
+        // Set default stats to prevent errors
+        setStats({
+          totalJobs: 0,
+          activeJobs: 0,
+          totalApplications: 0,
+          scheduledInterviews: 0,
+          totalHires: 0,
+          pendingApplications: 0
+        })
       }
 
       if (applicationsRes.ok) {
         const applicationsData = await applicationsRes.json()
-        setApplications(applicationsData.applications)
+        setApplications(applicationsData.applications || [])
+      } else {
+        console.error("Failed to fetch applications:", await applicationsRes.text())
+        // Set empty applications to prevent errors
+        setApplications([])
       }
     } catch (error) {
       console.error("Error fetching dashboard data:", error)
+      // Set default values to prevent component crashes
+      setStats({
+        totalJobs: 0,
+        activeJobs: 0,
+        totalApplications: 0,
+        scheduledInterviews: 0,
+        totalHires: 0,
+        pendingApplications: 0
+      })
+      setApplications([])
     } finally {
       setIsLoading(false)
     }
@@ -212,67 +238,88 @@ export default function RecruiterDashboard() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6">
-        {/* Welcome Section */}
-        <div className="bg-gradient-to-r from-green-600 to-blue-600 rounded-lg p-6 text-white">
-          <h1 className="text-2xl font-bold mb-2">
-            Welcome back, {session?.user?.name}!
-          </h1>
-          <p className="text-green-100 mb-4">
-            Manage your job postings and track candidate applications with advanced filtering.
-          </p>
-          <div className="flex flex-wrap gap-3">
-            <Link href="/recruiter/jobs/new">
-              <Button variant="secondary" size="sm">
-                <Briefcase className="w-4 h-4 mr-2" />
-                Post New Job
-              </Button>
-            </Link>
-            <Link href="/recruiter/interviews">
-              <Button variant="outline" size="sm" className="text-white border-white hover:bg-white hover:text-green-600">
-                <Calendar className="w-4 h-4 mr-2" />
-                Schedule Interview
-              </Button>
-            </Link>
+      <div className="space-y-8">
+        {/* Modern Welcome Section */}
+        <div className="relative overflow-hidden bg-gradient-to-br from-emerald-500 via-teal-600 to-blue-600 rounded-2xl p-8 text-white">
+          <div className="absolute inset-0 bg-gradient-to-r from-black/5 to-transparent"></div>
+          <div className="relative z-10">
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-3xl font-bold mb-2">
+                  Hello, {session?.user?.name?.split(' ')[0]}! 🚀
+                </h1>
+                <p className="text-white/90 text-lg mb-6">
+                  Ready to build your dream team? Let's find exceptional talent together.
+                </p>
+                <div className="flex flex-wrap gap-4">
+                  <Link href="/recruiter/jobs/post">
+                    <Button className="bg-white text-emerald-600 hover:bg-white/90 font-medium">
+                      <Briefcase className="w-4 h-4 mr-2" />
+                      Post New Job
+                    </Button>
+                  </Link>
+                  <Link href="/recruiter/analytics">
+                    <Button variant="outline" className="border-white/30 text-white hover:bg-white/10 backdrop-blur-sm">
+                      <TrendingUp className="w-4 h-4 mr-2" />
+                      View Analytics
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+              <div className="hidden lg:block">
+                <div className="w-32 h-32 bg-white/10 rounded-full backdrop-blur-sm flex items-center justify-center">
+                  <Users className="w-16 h-16 text-white/70" />
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Stats Cards */}
+        {/* Modern Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Jobs</CardTitle>
-              <Briefcase className="h-4 w-4 text-muted-foreground" />
+          <Card className="border-0 shadow-lg bg-gradient-to-br from-cyan-50 to-blue-100">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+              <CardTitle className="text-sm font-semibold text-cyan-700">Total Jobs</CardTitle>
+              <div className="p-2 bg-cyan-500 rounded-lg">
+                <Briefcase className="h-4 w-4 text-white" />
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.totalJobs}</div>
-              <p className="text-xs text-muted-foreground">
+              <div className="text-3xl font-bold text-cyan-900 mb-1">{stats.totalJobs}</div>
+              <p className="text-xs text-cyan-600 flex items-center">
+                <Activity className="w-3 h-3 mr-1" />
                 {stats.activeJobs} active
               </p>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Applications</CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
+          <Card className="border-0 shadow-lg bg-gradient-to-br from-emerald-50 to-teal-100">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+              <CardTitle className="text-sm font-semibold text-emerald-700">Applications</CardTitle>
+              <div className="p-2 bg-emerald-500 rounded-lg">
+                <Users className="h-4 w-4 text-white" />
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.totalApplications}</div>
-              <p className="text-xs text-muted-foreground">
+              <div className="text-3xl font-bold text-emerald-900 mb-1">{stats.totalApplications}</div>
+              <p className="text-xs text-emerald-600 flex items-center">
+                <TrendingUp className="w-3 h-3 mr-1" />
                 {stats.pendingApplications} pending review
               </p>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Interviews</CardTitle>
-              <Calendar className="h-4 w-4 text-muted-foreground" />
+          <Card className="border-0 shadow-lg bg-gradient-to-br from-violet-50 to-purple-100">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+              <CardTitle className="text-sm font-semibold text-violet-700">Interviews</CardTitle>
+              <div className="p-2 bg-violet-500 rounded-lg">
+                <Calendar className="h-4 w-4 text-white" />
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.scheduledInterviews}</div>
-              <p className="text-xs text-muted-foreground">
+              <div className="text-3xl font-bold text-violet-900 mb-1">{stats.scheduledInterviews}</div>
+              <p className="text-xs text-violet-600 flex items-center">
+                <Calendar className="w-3 h-3 mr-1" />
                 Scheduled this week
               </p>
             </CardContent>
@@ -403,11 +450,9 @@ export default function RecruiterDashboard() {
                         </Badge>
                         
                         <div className="flex space-x-1">
-                          <Button variant="outline" size="sm" asChild>
-                            <Link href={`/recruiter/applications/${application.id}`}>
-                              View
-                            </Link>
-                          </Button>
+                          <LinkButton variant="outline" size="sm" href={`/recruiter/applications/${application.id}`}>
+                            View
+                          </LinkButton>
                           
                           {application.interviews.length > 0 && (
                             <Button 

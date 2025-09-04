@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { LinkButton } from '@/components/ui/link-button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
@@ -198,11 +199,7 @@ export function ResumeEditor({ resume }: ResumeEditorProps) {
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle className="text-lg">Resume Sections</CardTitle>
-              <Button variant="outline" size="sm" asChild>
-                <Link href="/resume-builder">
-                  <ArrowLeft className="h-4 w-4" />
-                </Link>
-              </Button>
+              <LinkButton variant="outline" size="sm"  href="/resume-builder"><ArrowLeft className="h-4 w-4" /></LinkButton>
             </div>
           </CardHeader>
           <CardContent>
@@ -227,12 +224,10 @@ export function ResumeEditor({ resume }: ResumeEditorProps) {
                 <Save className="h-4 w-4 mr-2" />
                 {isSaving ? 'Saving...' : 'Save Resume'}
               </Button>
-              <Button variant="outline" className="w-full" asChild>
-                <Link href={`/resume-builder/${resume.id}/preview`}>
-                  <Eye className="h-4 w-4 mr-2" />
-                  Preview
-                </Link>
-              </Button>
+              <LinkButton variant="outline" className="w-full" href={`/resume-builder/${resume.id}/preview`}>
+                <Eye className="h-4 w-4 mr-2" />
+                Preview
+              </LinkButton>
               <Button variant="outline" className="w-full">
                 <Download className="h-4 w-4 mr-2" />
                 Download PDF

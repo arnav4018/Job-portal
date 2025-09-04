@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
@@ -27,10 +27,14 @@ export function ApplyButton({ jobId, referralCode }: ApplyButtonProps) {
   const [coverLetter, setCoverLetter] = useState('')
   const [resumes, setResumes] = useState<any[]>([])
 
-  const handleOpen = async () => {
-    setIsOpen(true)
-    
-    // Fetch user's resumes
+  // Fetch resumes when dialog opens
+  useEffect(() => {
+    if (isOpen) {
+      fetchResumes()
+    }
+  }, [isOpen])
+
+  const fetchResumes = async () => {
     try {
       const response = await fetch('/api/resumes')
       if (response.ok) {
@@ -107,7 +111,7 @@ export function ApplyButton({ jobId, referralCode }: ApplyButtonProps) {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button className="w-full" onClick={handleOpen}>
+        <Button className="w-full">
           Apply Now
         </Button>
       </DialogTrigger>

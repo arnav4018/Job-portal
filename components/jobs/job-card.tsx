@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { LinkButton } from '@/components/ui/link-button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { 
   MapPin, 
@@ -164,12 +165,10 @@ export function JobCard({ job }: JobCardProps) {
             <span>{job._count.applications} applicants</span>
           </div>
           
-          <Button size="sm" asChild>
-            <Link href={`/jobs/${job.id}`}>
-              View Details
-              <ExternalLink className="h-3 w-3 ml-1" />
-            </Link>
-          </Button>
+          <LinkButton size="sm" href={`/jobs/${job.id}`}>
+            View Details
+            <ExternalLink className="h-3 w-3 ml-1" />
+          </LinkButton>
         </div>
       </CardContent>
     </Card>

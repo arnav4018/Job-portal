@@ -301,6 +301,8 @@ export async function POST(request: NextRequest) {
       }
 
       return newApplication
+    }, {
+      timeout: 10000, // Increase timeout to 10 seconds
     })
 
     // Send email notification to recruiter (async)

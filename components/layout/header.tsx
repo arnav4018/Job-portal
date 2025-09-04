@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { useSession, signOut } from 'next-auth/react'
 import { Button } from '@/components/ui/button'
+import { LinkButton } from '@/components/ui/link-button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
   DropdownMenu,
@@ -73,39 +74,33 @@ export function Header() {
 
         <div className="flex items-center space-x-4">
           {/* Search */}
-          <Button variant="ghost" size="icon" className="hidden md:flex">
+          <div className="hidden md:flex h-9 w-9 items-center justify-center rounded-md hover:bg-accent hover:text-accent-foreground">
             <Search className="h-4 w-4" />
-          </Button>
+          </div>
 
           {status === 'loading' ? (
             <div className="h-8 w-8 animate-pulse rounded-full bg-muted" />
           ) : session ? (
             <div className="flex items-center space-x-2">
               {/* Notifications */}
-              <Button variant="ghost" size="icon" asChild>
-                <Link href="/dashboard">
-                  <Bell className="h-4 w-4" />
-                </Link>
-              </Button>
+              <LinkButton variant="ghost" size="icon" href="/dashboard">
+                <Bell className="h-4 w-4" />
+              </LinkButton>
 
               {/* Messages */}
-              <Button variant="ghost" size="icon" asChild>
-                <Link href="/dashboard/messages">
-                  <MessageSquare className="h-4 w-4" />
-                </Link>
-              </Button>
+              <LinkButton variant="ghost" size="icon" href="/dashboard/messages">
+                <MessageSquare className="h-4 w-4" />
+              </LinkButton>
 
               {/* User Menu */}
               <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                    <Avatar className="h-8 w-8">
-                      <AvatarImage src={session.user.image || ''} alt={session.user.name || ''} />
-                      <AvatarFallback>
-                        {getInitials(session.user.name || session.user.email || 'U')}
-                      </AvatarFallback>
-                    </Avatar>
-                  </Button>
+                <DropdownMenuTrigger className="flex items-center justify-center relative h-8 w-8 rounded-full bg-transparent hover:bg-accent focus:bg-accent focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none disabled:opacity-50">
+                  <Avatar className="h-8 w-8">
+                    <AvatarImage src={session.user.image || ''} alt={session.user.name || ''} />
+                    <AvatarFallback>
+                      {getInitials(session.user.name || session.user.email || 'U')}
+                    </AvatarFallback>
+                  </Avatar>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-56" align="end" forceMount>
                   <DropdownMenuLabel className="font-normal">
@@ -209,12 +204,12 @@ export function Header() {
             </div>
           ) : (
             <div className="flex items-center space-x-2">
-              <Button variant="ghost" asChild>
-                <Link href="/auth/signin">Sign In</Link>
-              </Button>
-              <Button asChild>
-                <Link href="/auth/signup">Sign Up</Link>
-              </Button>
+              <LinkButton variant="ghost" href="/auth/signin">
+                Sign In
+              </LinkButton>
+              <LinkButton href="/auth/signup">
+                Sign Up
+              </LinkButton>
             </div>
           )}
         </div>

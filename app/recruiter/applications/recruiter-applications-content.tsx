@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { LinkButton } from '@/components/ui/link-button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -357,11 +358,9 @@ export default function RecruiterApplicationsContent() {
                         )}
 
                         {application.resume && (
-                          <Button variant="outline" size="sm" asChild>
-                            <Link href={`/resume-builder/${application.resume.id}/preview`}>
-                              View Resume
-                            </Link>
-                          </Button>
+                          <LinkButton variant="outline" size="sm" href={`/resume-builder/${application.resume.id}/preview`}>
+                            View Resume
+                          </LinkButton>
                         )}
                       </div>
                     </div>

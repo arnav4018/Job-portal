@@ -1,6 +1,7 @@
 import { Suspense } from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
+import { LinkButton } from '@/components/ui/link-button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { JobSearchForm } from '@/components/jobs/job-search-form'
@@ -38,12 +39,12 @@ export default function HomePage() {
             </div>
             
             <div className="mt-8 flex flex-wrap justify-center gap-4">
-              <Button size="lg" asChild>
-                <Link href="/jobs">Browse All Jobs</Link>
-              </Button>
-              <Button size="lg" variant="outline" className="bg-white/10 border-white/20 text-white hover:bg-white/20" asChild>
-                <Link href="/auth/signup">Get Started</Link>
-              </Button>
+              <LinkButton size="lg" href="/jobs">
+                Browse All Jobs
+              </LinkButton>
+              <LinkButton size="lg" variant="outline" className="bg-white/10 border-white/20 text-white hover:bg-white/20" href="/auth/signup">
+                Get Started
+              </LinkButton>
             </div>
           </div>
         </div>
@@ -105,9 +106,9 @@ export default function HomePage() {
           </Suspense>
           
           <div className="text-center mt-8">
-            <Button size="lg" asChild>
-              <Link href="/jobs">View All Jobs</Link>
-            </Button>
+            <LinkButton size="lg" href="/jobs">
+              View All Jobs
+            </LinkButton>
           </div>
         </div>
       </section>
@@ -208,12 +209,12 @@ export default function HomePage() {
             Join thousands of professionals who found their dream jobs through JobPortal Pro
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" variant="secondary" asChild>
-              <Link href="/auth/signup?role=candidate">I'm Looking for a Job</Link>
-            </Button>
-            <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-primary" asChild>
-              <Link href="/auth/signup?role=recruiter">I'm Hiring</Link>
-            </Button>
+            <LinkButton size="lg" variant="secondary" href="/auth/signup?role=candidate">
+              I'm Looking for a Job
+            </LinkButton>
+            <LinkButton size="lg" variant="secondary" href="/auth/signup?role=recruiter">
+              I'm Hiring
+            </LinkButton>
           </div>
         </div>
       </section>

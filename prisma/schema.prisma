@@ -6,8 +6,8 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider = "sqlite"
+  url      = "file:./dev.db"
 }
 
 // Auth Models
@@ -82,6 +82,9 @@ model User {
   interviews    Interview[]
   quizAttempts  QuizAttempt[]
   commissions   Commission[]
+  savedFilters  SavedFilter[]
+  linkedinProfile LinkedInProfile?
+  employmentVerifications EmploymentVerification[]
 
   @@map("users")
 }
@@ -100,6 +103,26 @@ model Profile {
   experience  Int?     // Years of experience
   skills      String?  // JSON string of skills array
   preferences String?  // JSON string of preferences
+  
+  // Enhanced profile fields
+  noticePeriod        Int?     // Notice period in days
+  uanNumber           String?  // UAN (EPFO) number
+  linkedinProfile     String?  // LinkedIn profile URL
+  achievements        String?  // JSON array of achievements
+  buyoutOption        Boolean  @default(false) // Willing for buyout
+  currentCTC          Float?   // Current CTC
+  salarySlipUrl       String?  // Salary slip upload URL
+  expectedCTC         Float?   // Expected CTC
+  willingToRelocate   Boolean  @default(false)
+  numberOfReportees   Int?     // Current number of reportees
+  reportingTo         String?  // Current reporting manager designation
+  lastHikePercentage  Float?   // Last hike percentage
+  incrementLetterUrl  String?  // Increment letter URL
+  degree              String?  // Highest degree
+  aadharNumber        String?  // Aadhar number (encrypted)
+  panNumber           String?  // PAN number (encrypted)
+  profileCompleteness Float    @default(0.0) // Profile completion percentage
+  
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -119,12 +142,28 @@ model Company {
   size        String?  // "1-10", "11-50", etc.
   industry    String?
   verified    Boolean  @default(false)
+  
+  // Enhanced company profile fields
+  businessDetails String? // Business nature, products, services
+  products        String? // JSON array of products/services
+  turnover        Float?  // Annual turnover
+  teamSize        Int?    // Current team size
+  erpSystem       String? // ERP system used
+  leavesPolicy    String? // Leave policy details
+  workingDays     Int?    @default(5) // Working days per week
+  travelRequired  Boolean @default(false)
+  workTimings     String? // Work timings (JSON: {start: "09:00", end: "18:00"})
+  benefits        String? // JSON array of benefits
+  culture         String? // Company culture description
+  officeImages    String? // JSON array of office image URLs
+  
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
   jobs Job[]
   commissions Commission[]
+  hiringCredits HiringCredit[]
 
   @@map("companies")
 }
@@ -150,6 +189,19 @@ model Job {
   views           Int       @default(0)
   companyId       String
   recruiterId     String
+  
+  // Enhanced job posting fields
+  numberOfReporters Int?     // Number of people who will report to this role
+  reportingTo       String?  // Who this role reports to
+  leavesAllowed     Int?     // Annual leaves allowed
+  workingDaysPerWeek Int?    // Working days per week (auto-fetched from company)
+  travelRequired    Boolean  @default(false)
+  workTimings       String?  // Work timings (JSON)
+  benefits          String?  // JSON array of benefits
+  urgency           String   @default("NORMAL") // URGENT, HIGH, NORMAL, LOW
+  aiGenerated       Boolean  @default(false) // If job posting was AI generated
+  videoUrl          String?  // LinkedIn-style video URL
+  
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
   expiresAt       DateTime?
@@ -160,6 +212,7 @@ model Job {
   applications Application[]
   referrals    Referral[]
   searches     JobSearch[]
+  timeSlots    InterviewTimeSlot[]
 
   @@map("jobs")
 }
@@ -187,6 +240,7 @@ model Application {
   interviews Interview[]
   hireTracking HireTracking?
   commissions Commission[]
+  aiInterview AIInterview?
 
   @@unique([jobId, candidateId])
   @@map("applications")
@@ -207,6 +261,7 @@ model Resume {
   // Relations
   user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   applications Application[]
+  atsScore     ATSScore?
 
   @@map("resumes")
 }
@@ -243,6 +298,7 @@ model Referral {
   referrer User @relation(fields: [referrerId], references: [id], onDelete: Cascade)
   referred User? @relation("ReferredUser", fields: [referredId], references: [id])
   job      Job  @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  qualityScore ReferralQuality?
 
   @@map("referrals")
 }
@@ -556,4 +612,163 @@ model FeatureFlag {
   updatedAt DateTime @updatedAt
   
   @@map("feature_flags")
+}
+
+// Hiring Credits/Wallet System
+model HiringCredit {
+  id          String    @id @default(cuid())
+  companyId   String
+  credits     Int       // Available credits
+  totalPurchased Int    @default(0) // Total credits purchased
+  totalUsed   Int       @default(0) // Total credits used
+  expiresAt   DateTime? // Credit expiry date
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  transactions CreditTransaction[]
+
+  @@map("hiring_credits")
+}
+
+model CreditTransaction {
+  id          String   @id @default(cuid())
+  creditId    String
+  type        String   // PURCHASE, USAGE, REFUND, EXPIRY
+  amount      Int      // Credits amount
+  description String?  // Transaction description
+  metadata    String?  // JSON metadata
+  createdAt   DateTime @default(now())
+
+  credit HiringCredit @relation(fields: [creditId], references: [id], onDelete: Cascade)
+
+  @@map("credit_transactions")
+}
+
+// ATS Resume Scoring System
+model ATSScore {
+  id          String   @id @default(cuid())
+  resumeId    String   @unique
+  overallScore Float   // Overall ATS score (0-100)
+  keywordMatch Float   // Keyword matching score
+  formatScore  Float   // Format and structure score
+  experienceScore Float // Experience relevance score
+  skillsScore  Float   // Skills matching score
+  suggestions  String  // JSON array of improvement suggestions
+  analyzedAt   DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  resume Resume @relation(fields: [resumeId], references: [id], onDelete: Cascade)
+
+  @@map("ats_scores")
+}
+
+// Interview Time Slots Management
+model InterviewTimeSlot {
+  id          String    @id @default(cuid())
+  jobId       String
+  recruiterId String
+  date        DateTime  // Date of the slot
+  startTime   String    // Start time (HH:MM format)
+  endTime     String    // End time (HH:MM format)
+  isBooked    Boolean   @default(false)
+  bookedBy    String?   // Candidate ID who booked this slot
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  job Job @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  @@map("interview_time_slots")
+}
+
+// Referral Quality Scorecard
+model ReferralQuality {
+  id              String   @id @default(cuid())
+  referralId      String   @unique
+  qualityScore    Float    // Quality score (0-100)
+  profileMatch    Float    // How well profile matches job
+  experienceMatch Float    // Experience level match
+  skillsMatch     Float    // Skills matching score
+  responseTime    Int?     // Time taken to respond (hours)
+  interviewPerformance Float? // Interview performance score
+  hireSuccess     Boolean  @default(false) // Whether referral was hired
+  calculatedAt    DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  referral Referral @relation(fields: [referralId], references: [id], onDelete: Cascade)
+
+  @@map("referral_quality")
+}
+
+// AI Interview System
+model AIInterview {
+  id            String   @id @default(cuid())
+  applicationId String   @unique
+  questions     String   // JSON array of AI-generated questions
+  responses     String?  // JSON array of candidate responses
+  analysis      String?  // AI analysis of responses
+  score         Float?   // Overall interview score
+  status        String   @default("PENDING") // PENDING, IN_PROGRESS, COMPLETED
+  startedAt     DateTime?
+  completedAt   DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  application Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+
+  @@map("ai_interviews")
+}
+
+// Smart Filters for Advanced Search
+model SavedFilter {
+  id          String   @id @default(cuid())
+  userId      String
+  name        String   // Filter name (e.g., "High Paying Jobs", "Local Candidates")
+  type        String   // JOB_FILTER, CANDIDATE_FILTER
+  filters     String   // JSON object of filter criteria
+  isDefault   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("saved_filters")
+}
+
+// LinkedIn OAuth Integration
+model LinkedInProfile {
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  linkedinId      String   @unique
+  accessToken     String?  // Encrypted access token
+  refreshToken    String?  // Encrypted refresh token
+  profileData     String   // JSON of LinkedIn profile data
+  lastSyncAt      DateTime?
+  syncEnabled     Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("linkedin_profiles")
+}
+
+// UAN API Integration for Employment Verification
+model EmploymentVerification {
+  id            String    @id @default(cuid())
+  userId        String
+  uanNumber     String
+  companyName   String?
+  joinDate      DateTime?
+  exitDate      DateTime?
+  designation   String?
+  verificationStatus String @default("PENDING") // PENDING, VERIFIED, FAILED
+  verifiedAt    DateTime?
+  metadata      String?   // JSON metadata from UAN API
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("employment_verifications")
 }

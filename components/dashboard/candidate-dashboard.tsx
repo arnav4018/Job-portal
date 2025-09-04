@@ -15,7 +15,8 @@ import {
   MapPin, 
   Clock,
   DollarSign,
-  Users
+  Users,
+  Star
 } from "lucide-react"
 import DashboardLayout from "@/components/layout/dashboard-layout"
 
@@ -64,14 +65,35 @@ export default function CandidateDashboard() {
       if (statsRes.ok) {
         const statsData = await statsRes.json()
         setStats(statsData)
+      } else {
+        console.error("Failed to fetch stats:", await statsRes.text())
+        // Set default stats to prevent errors
+        setStats({
+          appliedJobs: 0,
+          savedJobs: 0,
+          profileViews: 0,
+          resumeDownloads: 0
+        })
       }
 
       if (applicationsRes.ok) {
         const applicationsData = await applicationsRes.json()
         setRecentApplications(applicationsData)
+      } else {
+        console.error("Failed to fetch applications:", await applicationsRes.text())
+        // Set empty applications to prevent errors
+        setRecentApplications([])
       }
     } catch (error) {
       console.error("Error fetching dashboard data:", error)
+      // Set default values to prevent component crashes
+      setStats({
+        appliedJobs: 0,
+        savedJobs: 0,
+        profileViews: 0,
+        resumeDownloads: 0
+      })
+      setRecentApplications([])
     } finally {
       setIsLoading(false)
     }
@@ -100,80 +122,104 @@ export default function CandidateDashboard() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6">
-        {/* Welcome Section */}
-        <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg p-6 text-white">
-          <h1 className="text-2xl font-bold mb-2">
-            Welcome back, {session?.user?.name}!
-          </h1>
-          <p className="text-blue-100 mb-4">
-            Ready to find your next opportunity? Let's get started.
-          </p>
-          <div className="flex flex-wrap gap-3">
-            <Link href="/jobs">
-              <Button variant="secondary" size="sm">
-                <Search className="w-4 h-4 mr-2" />
-                Browse Jobs
-              </Button>
-            </Link>
-            <Link href="/resume-builder">
-              <Button variant="outline" size="sm" className="text-white border-white hover:bg-white hover:text-blue-600">
-                <FileText className="w-4 h-4 mr-2" />
-                Build Resume
-              </Button>
-            </Link>
+      <div className="space-y-8">
+        {/* Modern Welcome Section */}
+        <div className="relative overflow-hidden bg-gradient-to-br from-indigo-500 via-purple-600 to-pink-500 rounded-2xl p-8 text-white">
+          <div className="absolute inset-0 bg-black/10"></div>
+          <div className="relative z-10">
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-3xl font-bold mb-2">
+                  Welcome back, {session?.user?.name?.split(' ')[0]}! 👋
+                </h1>
+                <p className="text-white/90 text-lg mb-6">
+                  Your career journey continues here. Let's find your perfect match.
+                </p>
+                <div className="flex flex-wrap gap-4">
+                  <Link href="/jobs">
+                    <Button className="bg-white text-indigo-600 hover:bg-white/90 font-medium">
+                      <Search className="w-4 h-4 mr-2" />
+                      Discover Jobs
+                    </Button>
+                  </Link>
+                  <Link href="/resume-builder">
+                    <Button variant="outline" className="border-white text-indigo-600 hover:bg-white/90 hover:text-indigo-600 transition-colors">
+                      <FileText className="w-4 h-4 mr-2" />
+                      Build Resume
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+              <div className="hidden lg:block">
+                <div className="w-32 h-32 bg-white/10 rounded-full backdrop-blur-sm flex items-center justify-center">
+                  <Briefcase className="w-16 h-16 text-white/70" />
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Stats Cards */}
+        {/* Modern Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Applied Jobs</CardTitle>
-              <Briefcase className="h-4 w-4 text-muted-foreground" />
+          <Card className="border-0 shadow-lg bg-gradient-to-br from-blue-50 to-indigo-100">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+              <CardTitle className="text-sm font-semibold text-blue-700">Applied Jobs</CardTitle>
+              <div className="p-2 bg-blue-500 rounded-lg">
+                <Briefcase className="h-4 w-4 text-white" />
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.appliedJobs}</div>
-              <p className="text-xs text-muted-foreground">
+              <div className="text-3xl font-bold text-blue-900 mb-1">{stats.appliedJobs}</div>
+              <p className="text-xs text-blue-600 flex items-center">
+                <TrendingUp className="w-3 h-3 mr-1" />
                 +2 from last week
               </p>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Profile Views</CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
+          <Card className="border-0 shadow-lg bg-gradient-to-br from-emerald-50 to-green-100">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+              <CardTitle className="text-sm font-semibold text-emerald-700">Profile Views</CardTitle>
+              <div className="p-2 bg-emerald-500 rounded-lg">
+                <Users className="h-4 w-4 text-white" />
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.profileViews}</div>
-              <p className="text-xs text-muted-foreground">
+              <div className="text-3xl font-bold text-emerald-900 mb-1">{stats.profileViews}</div>
+              <p className="text-xs text-emerald-600 flex items-center">
+                <TrendingUp className="w-3 h-3 mr-1" />
                 +12% from last month
               </p>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Resume Downloads</CardTitle>
-              <FileText className="h-4 w-4 text-muted-foreground" />
+          <Card className="border-0 shadow-lg bg-gradient-to-br from-purple-50 to-violet-100">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+              <CardTitle className="text-sm font-semibold text-purple-700">Resume Downloads</CardTitle>
+              <div className="p-2 bg-purple-500 rounded-lg">
+                <FileText className="h-4 w-4 text-white" />
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.resumeDownloads}</div>
-              <p className="text-xs text-muted-foreground">
+              <div className="text-3xl font-bold text-purple-900 mb-1">{stats.resumeDownloads}</div>
+              <p className="text-xs text-purple-600 flex items-center">
+                <TrendingUp className="w-3 h-3 mr-1" />
                 +5 this week
               </p>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Saved Jobs</CardTitle>
-              <TrendingUp className="h-4 w-4 text-muted-foreground" />
+          <Card className="border-0 shadow-lg bg-gradient-to-br from-orange-50 to-amber-100">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+              <CardTitle className="text-sm font-semibold text-orange-700">Saved Jobs</CardTitle>
+              <div className="p-2 bg-orange-500 rounded-lg">
+                <TrendingUp className="h-4 w-4 text-white" />
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.savedJobs}</div>
-              <p className="text-xs text-muted-foreground">
+              <div className="text-3xl font-bold text-orange-900 mb-1">{stats.savedJobs}</div>
+              <p className="text-xs text-orange-600 flex items-center">
+                <Star className="w-3 h-3 mr-1 fill-current" />
                 3 new matches
               </p>
             </CardContent>

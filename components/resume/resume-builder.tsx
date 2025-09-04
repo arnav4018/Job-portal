@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { LinkButton } from '@/components/ui/link-button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
@@ -232,12 +233,10 @@ export function ResumeBuilder({ existingResumes }: ResumeBuilderProps) {
                   </div>
                   
                   <div className="flex items-center space-x-2">
-                    <Button variant="outline" size="sm" asChild>
-                      <Link href={`/resume-builder/${resume.id}`}>
-                        <Edit className="h-4 w-4 mr-1" />
-                        Edit
-                      </Link>
-                    </Button>
+                    <LinkButton variant="outline" size="sm" href={`/resume-builder/${resume.id}`}>
+                      <Edit className="h-4 w-4 mr-1" />
+                      Edit
+                    </LinkButton>
                     <Button
                       variant="outline"
                       size="sm"

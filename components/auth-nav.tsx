@@ -3,6 +3,7 @@
 import { useSession, signOut } from 'next-auth/react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
+import { LinkButton } from '@/components/ui/link-button'
 
 export function AuthNav() {
   const { data: session, status } = useSession()
@@ -30,12 +31,12 @@ export function AuthNav() {
 
   return (
     <div className="flex items-center space-x-2">
-      <Button variant="outline" size="sm" asChild>
-        <Link href="/auth/signin">Sign In</Link>
-      </Button>
-      <Button size="sm" asChild>
-        <Link href="/auth/signup">Sign Up</Link>
-      </Button>
+      <LinkButton variant="outline" size="sm" href="/auth/signin">
+        Sign In
+      </LinkButton>
+      <LinkButton size="sm" href="/auth/signup">
+        Sign Up
+      </LinkButton>
     </div>
   )
 }

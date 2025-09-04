@@ -2,6 +2,7 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { LinkButton } from '@/components/ui/link-button'
 import { Building, MapPin, Users, ExternalLink } from 'lucide-react'
 import Link from 'next/link'
 
@@ -84,12 +85,10 @@ export default function CompaniesPage() {
                                 <Button variant="outline" size="sm" className="flex-1">
                                     View Profile
                                 </Button>
-                                <Button size="sm" className="flex-1" asChild>
-                                    <Link href={`/jobs?company=${company.id}`}>
-                                        <ExternalLink className="h-4 w-4 mr-1" />
-                                        View Jobs
-                                    </Link>
-                                </Button>
+                                <LinkButton size="sm" className="flex-1" href={`/jobs?company=${company.id}`}>
+                                    <ExternalLink className="h-4 w-4 mr-1" />
+                                    View Jobs
+                                </LinkButton>
                             </div>
                         </CardContent>
                     </Card>
@@ -104,11 +103,9 @@ export default function CompaniesPage() {
                         <p className="text-muted-foreground mb-4">
                             Join our platform to find talented candidates and grow your team.
                         </p>
-                        <Button asChild>
-                            <Link href="/auth/signup?role=RECRUITER">
-                                Post Jobs & Hire
-                            </Link>
-                        </Button>
+                        <LinkButton href="/auth/signup?role=RECRUITER">
+                            Post Jobs & Hire
+                        </LinkButton>
                     </CardContent>
                 </Card>
             </div>

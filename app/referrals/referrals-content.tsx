@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { LinkButton } from '@/components/ui/link-button'
 import { Badge } from '@/components/ui/badge'
 import { useToast } from '@/hooks/use-toast'
 import { 
@@ -221,12 +222,10 @@ export default function ReferralsContent({ referrals, stats }: ReferralsContentP
               <Plus className="h-4 w-4 mr-2" />
               Create New Referral
             </Button>
-            <Button variant="outline" size="lg" asChild>
-              <Link href="/referrals/earnings">
-                <DollarSign className="h-4 w-4 mr-2" />
-                View Earnings
-              </Link>
-            </Button>
+            <LinkButton variant="outline" size="lg" href="/referrals/earnings">
+              <DollarSign className="h-4 w-4 mr-2" />
+              View Earnings
+            </LinkButton>
           </div>
         </CardContent>
       </Card>

@@ -1,0 +1,9 @@
+// Correct way to export a page component
+export default function ErrorPage() {
+    return (
+      <div>
+        <h1>Something went wrong.</h1>
+        <p>Please try again later.</p>
+      </div>
+    );
+  }

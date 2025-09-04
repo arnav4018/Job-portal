@@ -83,3 +83,53 @@ ehthumbs.db
 *.pid
 *.seed
 *.pid.lock
+
+# TypeScript build info
+tsconfig.tsbuildinfo
+tsconfig.*.tsbuildinfo
+
+# Performance and monitoring
+.performance-baselines.json
+performance-*.json
+
+# Test results and reports
+testsprite_tests/*.html
+testsprite_tests/*.json
+test-results/
+test-reports/
+
+# Development tools and configs
+.kiro/
+WARP.md
+FIXES_SUMMARY.md
+
+# Temporary test files
+test-*.js
+test-*.ts
+
+# Database monitoring
+db-monitor-*.json
+db-performance-*.json
+
+# Error logs and debugging
+error-*.log
+debug-*.log
+auth-debug-*.log
+
+# API documentation (if auto-generated)
+api-docs/
+
+# Local development artifacts
+.local/
+.cache/
+.temp/
+.tmp/
+
+# Performance benchmarks
+benchmark-results/
+performance-reports/
+
+# Security sensitive files
+secret-*
+keys/
+certificates/

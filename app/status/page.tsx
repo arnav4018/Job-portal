@@ -1,6 +1,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { LinkButton } from '@/components/ui/link-button'
 import Link from 'next/link'
 import { CheckCircle, AlertCircle, Clock, Database, Server, Globe } from 'lucide-react'
 
@@ -167,12 +168,12 @@ export default function StatusPage() {
 
           {/* Actions */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button asChild>
-              <Link href="/">Return to Homepage</Link>
-            </Button>
-            <Button variant="outline" asChild>
-              <Link href="/api/health">Check API Health</Link>
-            </Button>
+            <LinkButton href="/">
+              Return to Homepage
+            </LinkButton>
+            <LinkButton variant="outline" href="/api/health">
+              Check API Health
+            </LinkButton>
           </div>
         </div>
       </div>

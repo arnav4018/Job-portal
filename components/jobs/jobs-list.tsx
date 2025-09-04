@@ -2,6 +2,7 @@ import { JobCard } from './job-card'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Search } from 'lucide-react'
+import { prisma } from '@/lib/prisma'
 
 interface JobsListProps {
   searchParams: {
@@ -18,19 +19,126 @@ interface JobsListProps {
 }
 
 export async function JobsList({ searchParams }: JobsListProps) {
-  // Build query parameters
-  const params = new URLSearchParams()
-  Object.entries(searchParams).forEach(([key, value]) => {
-    if (value) params.set(key, value)
-  })
+  // Convert params to proper types
+  const page = searchParams.page ? parseInt(searchParams.page) : 1
+  const limit = 10
+  const salaryMin = searchParams.salaryMin ? parseInt(searchParams.salaryMin) : undefined
+  const salaryMax = searchParams.salaryMax ? parseInt(searchParams.salaryMax) : undefined
+  const remote = searchParams.remote === 'true'
+  const skills = searchParams.skills ? searchParams.skills.split(',') : undefined
   
-  // Fetch jobs from API
-  const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000'
-  const response = await fetch(`${baseUrl}/api/jobs?${params.toString()}`, {
-    cache: 'no-store',
-  })
+  // Build where clause
+  const where: any = {
+    status: 'PUBLISHED',
+  }
   
-  if (!response.ok) {
+  if (searchParams.query) {
+    where.OR = [
+      { title: { contains: searchParams.query } },
+      { description: { contains: searchParams.query } },
+      { skills: { contains: searchParams.query } },
+    ]
+  }
+  
+  if (searchParams.location) {
+    where.location = { contains: searchParams.location }
+  }
+  
+  if (searchParams.type) {
+    where.type = searchParams.type
+  }
+  
+  if (searchParams.experienceLevel) {
+    where.experienceLevel = searchParams.experienceLevel
+  }
+  
+  if (searchParams.remote) {
+    where.remote = remote
+  }
+  
+  if (salaryMin) {
+    where.salaryMin = { gte: salaryMin }
+  }
+  
+  if (salaryMax) {
+    where.salaryMax = { lte: salaryMax }
+  }
+  
+  if (skills && skills.length > 0) {
+    where.skills = { contains: skills[0] }
+  }
+  
+  const skip = (page - 1) * limit
+  
+  let jobs: any[] = []
+  let pagination = {
+    page,
+    limit,
+    total: 0,
+    pages: 0,
+  }
+  
+  try {
+    const [jobsRaw, total] = await Promise.all([
+      prisma.job.findMany({
+        where,
+        include: {
+          company: {
+            select: {
+              name: true,
+              logo: true,
+              location: true,
+            },
+          },
+          recruiter: {
+            select: {
+              name: true,
+              image: true,
+            },
+          },
+          _count: {
+            select: {
+              applications: true,
+            },
+          },
+        },
+        orderBy: [
+          { featured: 'desc' },
+          { createdAt: 'desc' },
+        ],
+        skip,
+        take: limit,
+      }),
+      prisma.job.count({ where }),
+    ])
+    
+    // Parse skills from JSON strings
+    jobs = jobsRaw.map(job => ({
+      ...job,
+      skills: job.skills ? JSON.parse(job.skills) : [],
+    }))
+    
+    pagination = {
+      page,
+      limit,
+      total,
+      pages: Math.ceil(total / limit),
+    }
+    
+    // Log search for analytics (optional, in background)
+    if (searchParams.query || Object.keys(searchParams).length > 0) {
+      prisma.jobSearch.create({
+        data: {
+          query: searchParams.query,
+          filters: JSON.stringify(searchParams),
+          results: total,
+        },
+      }).catch(error => {
+        console.error('Failed to log job search:', error)
+      })
+    }
+  } catch (error) {
+    console.error('Failed to fetch jobs:', error)
     return (
       <Card>
         <CardContent className="p-8 text-center">
@@ -39,9 +147,6 @@ export async function JobsList({ searchParams }: JobsListProps) {
       </Card>
     )
   }
-  
-  const data = await response.json()
-  const { jobs, pagination } = data
 
   if (jobs.length === 0) {
     return (
