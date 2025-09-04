@@ -29,10 +29,11 @@ ENV SKIP_ENV_VALIDATION=true
 
 # Install dependencies with better error handling
 # Skip scripts to avoid postinstall issues with Prisma
+# Install all dependencies including dev deps for TypeScript build
 RUN npm cache clean --force && \
-    npm install --legacy-peer-deps --no-audit --no-fund --ignore-scripts || \
+    npm install --legacy-peer-deps --no-audit --no-fund --ignore-scripts --include=dev || \
     (echo "npm install failed, trying with different flags" && \
-     npm install --legacy-peer-deps --no-shrinkwrap --no-audit --no-fund --ignore-scripts)
+     npm install --legacy-peer-deps --no-shrinkwrap --no-audit --no-fund --ignore-scripts --include=dev)
 
 # Copy source code (including prisma directory)
 COPY . .
