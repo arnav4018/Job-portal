@@ -37,8 +37,7 @@
     "deploy:railway": "railway up",
     "deploy:production": "bash scripts/deploy-production.sh",
     "clean": "rm -rf .next out dist",
-    "prepare": "node scripts/prepare.js",
-    "postinstall": "prisma generate"
+    "prepare": "node scripts/prepare.js"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^1.4.0",

@@ -26,10 +26,11 @@ ENV SKIP_DATABASE_VALIDATION=true
 ENV SKIP_ENV_VALIDATION=true
 
 # Install dependencies with better error handling
+# Skip scripts to avoid postinstall issues with Prisma
 RUN npm cache clean --force && \
-    npm install --legacy-peer-deps --no-audit --no-fund || \
+    npm install --legacy-peer-deps --no-audit --no-fund --ignore-scripts || \
     (echo "npm install failed, trying with different flags" && \
-     npm install --legacy-peer-deps --no-shrinkwrap --no-audit --no-fund)
+     npm install --legacy-peer-deps --no-shrinkwrap --no-audit --no-fund --ignore-scripts)
 
 # Copy source code (including prisma directory)
 COPY . .
