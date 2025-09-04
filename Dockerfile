@@ -14,11 +14,12 @@ RUN npm config set fund false
 RUN npm config set audit-level none
 
 # Copy package files
-COPY package.json package-lock.json ./
+COPY package.json package-lock.json* ./
 
 # Clean npm cache and install dependencies
 RUN npm cache clean --force
-RUN npm ci --no-optional --no-audit --no-fund
+# Use npm install instead of npm ci to avoid checksum issues
+RUN npm install --production=false --no-optional --no-audit --no-fund
 
 # Copy source code
 COPY . .
